@@ -15,11 +15,11 @@ block content %}
         + Add Route
     </button>
 </div>
-<div class="bg-zinc-900 border border-zinc-800 rounded-none overflow-hidden">
+<div class="bg-white border border-zinc-200 rounded-none overflow-hidden">
     <table class="w-full text-sm">
         <thead>
             <tr
-                class="bg-zinc-800/60 text-zinc-500 text-xs uppercase tracking-wider"
+                class="bg-zinc-100 text-zinc-500 text-xs uppercase tracking-wider"
             >
                 <th class="px-4 py-3 text-left font-medium">ID</th>
                 <th class="px-4 py-3 text-left font-medium">Departure</th>
@@ -30,7 +30,7 @@ block content %}
                 <th class="px-4 py-3 text-left font-medium">Actions</th>
             </tr>
         </thead>
-        <tbody id="rtBody" class="divide-y divide-zinc-800"></tbody>
+        <tbody id="rtBody" class="divide-y divide-zinc-200"></tbody>
     </table>
 </div>
 
@@ -39,7 +39,7 @@ block content %}
     id="rtModal"
 >
     <div
-        class="modal-box bg-zinc-900 border border-zinc-700 rounded-none p-8 w-full max-w-md translate-y-3 scale-95"
+        class="modal-box bg-white border border-zinc-200 rounded-none p-8 w-full max-w-md translate-y-3 scale-95"
     >
         <div class="flex items-center justify-between mb-6">
             <h3 class="font-display font-bold text-lg" id="rtModalTitle">
@@ -47,7 +47,7 @@ block content %}
             </h3>
             <button
                 onclick="closeModal('rtModal')"
-                class="text-zinc-500 hover:text-zinc-200 text-xl leading-none"
+                class="text-zinc-500 hover:text-zinc-700 text-xl leading-none"
             >
                 &times;
             </button>
@@ -60,7 +60,7 @@ block content %}
                 >
                 <select
                     id="f_dep_st"
-                    class="w-full bg-zinc-800 border border-zinc-700 rounded-none px-3 py-2.5 text-sm focus:outline-none focus:border-violet-500 transition-colors"
+                    class="w-full bg-white border border-zinc-200 rounded-none px-3 py-2.5 text-sm focus:outline-none focus:border-violet-500 transition-colors"
                 ></select>
             </div>
             <div>
@@ -70,7 +70,7 @@ block content %}
                 >
                 <select
                     id="f_arr_st"
-                    class="w-full bg-zinc-800 border border-zinc-700 rounded-none px-3 py-2.5 text-sm focus:outline-none focus:border-violet-500 transition-colors"
+                    class="w-full bg-white border border-zinc-200 rounded-none px-3 py-2.5 text-sm focus:outline-none focus:border-violet-500 transition-colors"
                 ></select>
             </div>
         </div>
@@ -83,7 +83,7 @@ block content %}
                 <input
                     id="f_dep_time"
                     type="time"
-                    class="w-full bg-zinc-800 border border-zinc-700 rounded-none px-3 py-2.5 text-sm focus:outline-none focus:border-violet-500 transition-colors"
+                    class="w-full bg-white border border-zinc-200 rounded-none px-3 py-2.5 text-sm focus:outline-none focus:border-violet-500 transition-colors"
                 />
             </div>
             <div>
@@ -94,7 +94,7 @@ block content %}
                 <input
                     id="f_arr_time"
                     type="time"
-                    class="w-full bg-zinc-800 border border-zinc-700 rounded-none px-3 py-2.5 text-sm focus:outline-none focus:border-violet-500 transition-colors"
+                    class="w-full bg-white border border-zinc-200 rounded-none px-3 py-2.5 text-sm focus:outline-none focus:border-violet-500 transition-colors"
                 />
             </div>
         </div>
@@ -105,7 +105,7 @@ block content %}
             >
             <select
                 id="f_train_id"
-                class="w-full bg-zinc-800 border border-zinc-700 rounded-none px-3 py-2.5 text-sm focus:outline-none focus:border-violet-500 transition-colors"
+                class="w-full bg-white border border-zinc-200 rounded-none px-3 py-2.5 text-sm focus:outline-none focus:border-violet-500 transition-colors"
             >
                 <option value="">— None —</option>
             </select>
@@ -113,7 +113,7 @@ block content %}
         <div class="flex gap-3 justify-end">
             <button
                 onclick="closeModal('rtModal')"
-                class="px-4 py-2 text-sm rounded-none border border-zinc-700 text-zinc-400 hover:bg-zinc-800 hover:text-zinc-100 transition-colors"
+                class="px-4 py-2 text-sm rounded-none border border-zinc-200 text-zinc-700 hover:bg-zinc-100 transition-colors"
             >
                 Cancel
             </button>
@@ -158,22 +158,22 @@ block content %}
                 .join("");
         const body = document.getElementById("rtBody");
         if (!routes.length) {
-            body.innerHTML = `<tr><td colspan="7"><div class="text-center py-12 text-zinc-600">No routes yet.</div></td></tr>`;
+            body.innerHTML = `<tr><td colspan="7"><div class="text-center py-12 text-zinc-400">No routes yet.</div></td></tr>`;
             return;
         }
         body.innerHTML = routes
             .map(
                 (r) => `
-    <tr class="hover:bg-zinc-800/40 transition-colors">
-      <td class="px-4 py-3 text-zinc-600 text-xs">#${r.route_id}</td>
+    <tr class="hover:bg-zinc-50 transition-colors">
+      <td class="px-4 py-3 text-zinc-500 text-xs">#${r.route_id}</td>
       <td class="px-4 py-3"><div class="font-medium">${r.dep_name}</div><div class="text-xs text-zinc-500">${r.dep_city}</div></td>
       <td class="px-4 py-3"><div class="font-medium">${r.arr_name}</div><div class="text-xs text-zinc-500">${r.arr_city}</div></td>
-      <td class="px-4 py-3">${r.train_name ? `<span class="inline-flex px-2.5 py-0.5 rounded-full text-xs font-medium bg-violet-500/15 text-violet-400">${r.train_name}</span>` : '<span class="text-zinc-600">—</span>'}</td>
-      <td class="px-4 py-3 text-zinc-300 tabular-nums text-xs">${r.departure_time}</td>
-      <td class="px-4 py-3 text-zinc-300 tabular-nums text-xs">${r.arrival_time}</td>
+      <td class="px-4 py-3">${r.train_name ? `<span class="inline-flex px-2.5 py-0.5 rounded-full text-xs font-medium bg-violet-100 text-violet-600">${r.train_name}</span>` : '<span class="text-zinc-500">—</span>'}</td>
+      <td class="px-4 py-3 text-zinc-700 tabular-nums text-xs">${r.departure_time}</td>
+      <td class="px-4 py-3 text-zinc-700 tabular-nums text-xs">${r.arrival_time}</td>
       <td class="px-4 py-3"><div class="flex gap-2">
-        <button onclick="openEdit(${r.route_id})" class="px-3 py-1.5 text-xs rounded-md border border-zinc-700 text-zinc-400 hover:bg-zinc-800 hover:text-zinc-100 transition-colors">Edit</button>
-        <button onclick="del(${r.route_id})" class="px-3 py-1.5 text-xs rounded-md border border-red-500/30 text-red-400 hover:bg-red-500/10 transition-colors">Delete</button>
+        <button onclick="openEdit(${r.route_id})" class="px-3 py-1.5 text-xs rounded-md border border-zinc-200 text-zinc-700 hover:bg-zinc-100 transition-colors">Edit</button>
+        <button onclick="del(${r.route_id})" class="px-3 py-1.5 text-xs rounded-md border border-red-100 text-red-500 hover:bg-red-50 transition-colors">Delete</button>
       </div></td>
     </tr>
   `,

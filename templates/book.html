@@ -27,10 +27,10 @@
         >
             Passenger Details
         </h2>
-        <div class="bg-zinc-900 border border-zinc-800 rounded-none p-6">
+        <div class="bg-white border border-zinc-200 rounded-none p-6">
             <div
                 id="selectedRoute"
-                class="hidden mb-5 p-4 bg-zinc-800 rounded-none border-l-2 border-violet-500"
+                class="hidden mb-5 p-4 bg-zinc-100 rounded-none border-l-2 border-violet-500"
             >
                 <div
                     class="text-xs text-zinc-500 uppercase tracking-wider mb-1"
@@ -56,7 +56,7 @@
                     <input
                         id="b_first"
                         placeholder="Jane"
-                        class="w-full bg-zinc-800 border border-zinc-700 rounded-none px-3 py-2.5 text-sm focus:outline-none focus:border-violet-500 transition-colors"
+                        class="w-full bg-white border border-zinc-200 rounded-none px-3 py-2.5 text-sm focus:outline-none focus:border-violet-500 transition-colors"
                     />
                 </div>
                 <div>
@@ -67,7 +67,7 @@
                     <input
                         id="b_last"
                         placeholder="Doe"
-                        class="w-full bg-zinc-800 border border-zinc-700 rounded-none px-3 py-2.5 text-sm focus:outline-none focus:border-violet-500 transition-colors"
+                        class="w-full bg-white border border-zinc-200 rounded-none px-3 py-2.5 text-sm focus:outline-none focus:border-violet-500 transition-colors"
                     />
                 </div>
             </div>
@@ -80,7 +80,7 @@
                     id="b_email"
                     type="email"
                     placeholder="jane@example.com"
-                    class="w-full bg-zinc-800 border border-zinc-700 rounded-none px-3 py-2.5 text-sm focus:outline-none focus:border-violet-500 transition-colors"
+                    class="w-full bg-white border border-zinc-200 rounded-none px-3 py-2.5 text-sm focus:outline-none focus:border-violet-500 transition-colors"
                 />
             </div>
             <div class="mb-4">
@@ -91,7 +91,7 @@
                 <input
                     id="b_phone"
                     placeholder="+65 9000 0000"
-                    class="w-full bg-zinc-800 border border-zinc-700 rounded-none px-3 py-2.5 text-sm focus:outline-none focus:border-violet-500 transition-colors"
+                    class="w-full bg-white border border-zinc-200 rounded-none px-3 py-2.5 text-sm focus:outline-none focus:border-violet-500 transition-colors"
                 />
             </div>
             <div class="mb-6">
@@ -102,7 +102,7 @@
                 <input
                     id="b_seat"
                     placeholder="A12"
-                    class="w-full bg-zinc-800 border border-zinc-700 rounded-none px-3 py-2.5 text-sm focus:outline-none focus:border-violet-500 transition-colors"
+                    class="w-full bg-white border border-zinc-200 rounded-none px-3 py-2.5 text-sm focus:outline-none focus:border-violet-500 transition-colors"
                 />
             </div>
             <button
@@ -128,7 +128,7 @@
         cont.innerHTML = routes
             .map(
                 (r) => `
-    <div class="route-card group bg-zinc-900 border border-zinc-800 rounded-none p-4 mb-3 cursor-pointer hover:border-zinc-600 hover:bg-zinc-800/60 transition-all" id="rc_${r.route_id}" onclick="selectRoute(${r.route_id})">
+    <div class="route-card group bg-white border border-zinc-200 rounded-none p-4 mb-3 cursor-pointer hover:border-zinc-600 hover:bg-zinc-100/60 transition-all" id="rc_${r.route_id}" onclick="selectRoute(${r.route_id})">
       <div class="flex items-center justify-between mb-2">
         <div class="font-medium text-sm">${r.dep_name} <span class="text-zinc-500 mx-1">→</span> ${r.arr_name}</div>
         <div class="font-display font-bold text-violet-400">${r.ticket_price ? "$" + parseFloat(r.ticket_price).toFixed(2) : "—"}</div>

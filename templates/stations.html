@@ -15,11 +15,11 @@
         + Add Station
     </button>
 </div>
-<div class="bg-zinc-900 border border-zinc-800 rounded-none overflow-hidden">
+<div class="bg-white border border-zinc-200 rounded-none overflow-hidden">
     <table class="w-full text-sm">
         <thead>
             <tr
-                class="bg-zinc-800/60 text-zinc-500 text-xs uppercase tracking-wider"
+                class="bg-zinc-100 text-zinc-500 text-xs uppercase tracking-wider"
             >
                 <th class="px-4 py-3 text-left font-medium">ID</th>
                 <th class="px-4 py-3 text-left font-medium">Station Name</th>
@@ -28,7 +28,7 @@
                 <th class="px-4 py-3 text-left font-medium">Actions</th>
             </tr>
         </thead>
-        <tbody id="stBody" class="divide-y divide-zinc-800"></tbody>
+        <tbody id="stBody" class="divide-y divide-zinc-200"></tbody>
     </table>
 </div>
 
@@ -37,7 +37,7 @@
     id="stModal"
 >
     <div
-        class="modal-box bg-zinc-900 border border-zinc-700 rounded-none p-8 w-full max-w-md translate-y-3 scale-95"
+        class="modal-box bg-white border border-zinc-200 rounded-none p-8 w-full max-w-md translate-y-3 scale-95"
     >
         <div class="flex items-center justify-between mb-6">
             <h3 class="font-display font-bold text-lg" id="stModalTitle">
@@ -45,7 +45,7 @@
             </h3>
             <button
                 onclick="closeModal('stModal')"
-                class="text-zinc-500 hover:text-zinc-200 text-xl leading-none"
+                class="text-zinc-500 hover:text-zinc-800 text-xl leading-none"
             >
                 &times;
             </button>
@@ -58,7 +58,7 @@
             <input
                 id="f_station_name"
                 placeholder="Central Station"
-                class="w-full bg-zinc-800 border border-zinc-700 rounded-none px-3 py-2.5 text-sm focus:outline-none focus:border-violet-500 transition-colors"
+                class="w-full bg-white border border-zinc-200 rounded-none px-3 py-2.5 text-sm focus:outline-none focus:border-violet-500 transition-colors"
             />
         </div>
         <div class="grid grid-cols-2 gap-4 mb-6">
@@ -70,7 +70,7 @@
                 <input
                     id="f_city"
                     placeholder="Singapore"
-                    class="w-full bg-zinc-800 border border-zinc-700 rounded-none px-3 py-2.5 text-sm focus:outline-none focus:border-violet-500 transition-colors"
+                    class="w-full bg-white border border-zinc-200 rounded-none px-3 py-2.5 text-sm focus:outline-none focus:border-violet-500 transition-colors"
                 />
             </div>
             <div>
@@ -81,14 +81,14 @@
                 <input
                     id="f_state_name"
                     placeholder="Central"
-                    class="w-full bg-zinc-800 border border-zinc-700 rounded-none px-3 py-2.5 text-sm focus:outline-none focus:border-violet-500 transition-colors"
+                    class="w-full bg-white border border-zinc-200 rounded-none px-3 py-2.5 text-sm focus:outline-none focus:border-violet-500 transition-colors"
                 />
             </div>
         </div>
         <div class="flex gap-3 justify-end">
             <button
                 onclick="closeModal('stModal')"
-                class="px-4 py-2 text-sm rounded-none border border-zinc-700 text-zinc-400 hover:bg-zinc-800 hover:text-zinc-100 transition-colors"
+                class="px-4 py-2 text-sm rounded-none border border-zinc-200 text-zinc-800 hover:bg-zinc-100 hover:text-zinc-900 transition-colors"
             >
                 Cancel
             </button>
@@ -118,14 +118,14 @@
         body.innerHTML = stations
             .map(
                 (s) => `
-    <tr class="hover:bg-zinc-800/40 transition-colors">
+    <tr class="hover:bg-zinc-100 transition-colors">
       <td class="px-4 py-3 text-zinc-600 text-xs">#${s.station_id}</td>
       <td class="px-4 py-3 font-medium">${s.station_name}</td>
-      <td class="px-4 py-3 text-zinc-300">${s.city}</td>
-      <td class="px-4 py-3 text-zinc-300">${s.state_name}</td>
+      <td class="px-4 py-3 text-zinc-800">${s.city}</td>
+      <td class="px-4 py-3 text-zinc-800">${s.state_name}</td>
       <td class="px-4 py-3"><div class="flex gap-2">
-        <button onclick="openEdit(${s.station_id})" class="px-3 py-1.5 text-xs rounded-md border border-zinc-700 text-zinc-400 hover:bg-zinc-800 hover:text-zinc-100 transition-colors">Edit</button>
-        <button onclick="del(${s.station_id},'${s.station_name}')" class="px-3 py-1.5 text-xs rounded-md border border-red-500/30 text-red-400 hover:bg-red-500/10 transition-colors">Delete</button>
+        <button onclick="openEdit(${s.station_id})" class="px-3 py-1.5 text-xs rounded-md border border-zinc-200 text-zinc-800 hover:bg-zinc-100 hover:text-zinc-900 transition-colors">Edit</button>
+        <button onclick="del(${s.station_id},'${s.station_name}')" class="px-3 py-1.5 text-xs rounded-md border border-red-200 text-red-500 hover:bg-red-50 transition-colors">Delete</button>
       </div></td>
     </tr>
   `,

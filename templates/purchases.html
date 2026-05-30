@@ -22,11 +22,11 @@
         </div>
     </div>
 </div>
-<div class="bg-zinc-900 border border-zinc-800 rounded-none overflow-hidden">
+<div class="bg-white border border-zinc-200 rounded-none overflow-hidden">
     <table class="w-full text-sm">
         <thead>
             <tr
-                class="bg-zinc-800/60 text-zinc-500 text-xs uppercase tracking-wider"
+                class="bg-zinc-100 text-zinc-500 text-xs uppercase tracking-wider"
             >
                 <th class="px-4 py-3 text-left font-medium">ID</th>
                 <th class="px-4 py-3 text-left font-medium">Passenger</th>
@@ -38,7 +38,7 @@
                 <th class="px-4 py-3 text-left font-medium">Actions</th>
             </tr>
         </thead>
-        <tbody id="purBody" class="divide-y divide-zinc-800"></tbody>
+        <tbody id="purBody" class="divide-y divide-zinc-200"></tbody>
     </table>
 </div>
 
@@ -48,13 +48,13 @@
     id="statusModal"
 >
     <div
-        class="modal-box bg-zinc-900 border border-zinc-700 rounded-none p-8 w-full max-w-sm translate-y-3 scale-95"
+        class="modal-box bg-white border border-zinc-200 rounded-none p-8 w-full max-w-sm translate-y-3 scale-95"
     >
         <div class="flex items-center justify-between mb-6">
             <h3 class="font-display font-bold text-lg">Update Status</h3>
             <button
                 onclick="closeModal('statusModal')"
-                class="text-zinc-500 hover:text-zinc-200 text-xl leading-none"
+                class="text-zinc-500 hover:text-zinc-700 text-xl leading-none"
             >
                 &times;
             </button>
@@ -66,7 +66,7 @@
             ></label>
             <select
                 id="f_status"
-                class="w-full bg-zinc-800 border border-zinc-700 rounded-none px-3 py-2.5 text-sm focus:outline-none focus:border-violet-500 transition-colors"
+                class="w-full bg-white border border-zinc-200 rounded-none px-3 py-2.5 text-sm focus:outline-none focus:border-violet-500 transition-colors"
             >
                 <option value="pending">Pending</option>
                 <option value="paid">Paid</option>
@@ -76,7 +76,7 @@
         <div class="flex gap-3 justify-end">
             <button
                 onclick="closeModal('statusModal')"
-                class="px-4 py-2 text-sm rounded-none border border-zinc-700 text-zinc-400 hover:bg-zinc-800 hover:text-zinc-100 transition-colors"
+                class="px-4 py-2 text-sm rounded-none border border-zinc-200 text-zinc-500 hover:bg-zinc-100 hover:text-zinc-700 transition-colors"
             >
                 Cancel
             </button>
@@ -96,9 +96,9 @@
         editStatusId = null;
     const statusCls = (s) =>
         ({
-            pending: "bg-blue-500/15 text-blue-400",
-            paid: "bg-emerald-500/15 text-emerald-400",
-            canceled: "bg-red-500/15 text-red-400",
+            pending: "bg-blue-500/15 text-blue-600",
+            paid: "bg-emerald-500/15 text-emerald-600",
+            canceled: "bg-red-500/15 text-red-600",
         })[s] || "";
     async function load() {
         purchases = await api("/api/purchases");
@@ -125,23 +125,23 @@
             `${list.length} of ${purchases.length} purchases`;
         const body = document.getElementById("purBody");
         if (!list.length) {
-            body.innerHTML = `<tr><td colspan="8"><div class="text-center py-12 text-zinc-600">No purchases found.</div></td></tr>`;
+            body.innerHTML = `<tr><td colspan="8"><div class="text-center py-12 text-zinc-500">No purchases found.</div></td></tr>`;
             return;
         }
         body.innerHTML = list
             .map(
                 (p) => `
-    <tr class="hover:bg-zinc-800/40 transition-colors">
+    <tr class="hover:bg-zinc-50 transition-colors">
       <td class="px-4 py-3 text-zinc-600 text-xs">#${p.purchase_id}</td>
       <td class="px-4 py-3"><div class="font-medium">${p.first_name} ${p.last_name}</div><div class="text-xs text-zinc-500">${p.email}</div></td>
-      <td class="px-4 py-3 text-xs"><div class="text-zinc-300">${p.dep_name} → ${p.arr_name}</div><div class="text-zinc-500">${p.departure_time} – ${p.arrival_time}</div></td>
-      <td class="px-4 py-3 text-zinc-400 text-xs">${p.train_name || "—"}</td>
+      <td class="px-4 py-3 text-xs"><div class="text-zinc-700">${p.dep_name} → ${p.arr_name}</div><div class="text-zinc-500">${p.departure_time} – ${p.arrival_time}</div></td>
+      <td class="px-4 py-3 text-zinc-600 text-xs">${p.train_name || "—"}</td>
       <td class="px-4 py-3 font-medium">${p.seat_no}</td>
       <td class="px-4 py-3 text-zinc-500 text-xs">${p.purchase_date_status}</td>
       <td class="px-4 py-3"><span class="inline-flex px-2.5 py-0.5 rounded-full text-xs font-medium ${statusCls(p.status)}">${p.status}</span></td>
       <td class="px-4 py-3"><div class="flex gap-2">
-        <button onclick="openStatus(${p.purchase_id},'${p.status}')" class="px-3 py-1.5 text-xs rounded-md border border-zinc-700 text-zinc-400 hover:bg-zinc-800 hover:text-zinc-100 transition-colors">Status</button>
-        <button onclick="del(${p.purchase_id})" class="px-3 py-1.5 text-xs rounded-md border border-red-500/30 text-red-400 hover:bg-red-500/10 transition-colors">Delete</button>
+        <button onclick="openStatus(${p.purchase_id},'${p.status}')" class="px-3 py-1.5 text-xs rounded-md border border-zinc-200 text-zinc-500 hover:bg-zinc-100 hover:text-zinc-700 transition-colors">Status</button>
+        <button onclick="del(${p.purchase_id})" class="px-3 py-1.5 text-xs rounded-md border border-red-200 text-red-500 hover:bg-red-50 transition-colors">Delete</button>
       </div></td>
     </tr>
   `,
