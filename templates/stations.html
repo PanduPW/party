@@ -1,0 +1,177 @@
+{% extends "base.html" %} {% block title %}Stations — RailBooker{% endblock %}
+{% block content %}
+<div class="mb-8">
+    <h1 class="font-display font-bold text-2xl tracking-tight">Stations</h1>
+    <p class="text-zinc-500 text-sm mt-1">
+        Manage departure and arrival stations
+    </p>
+</div>
+<div class="flex items-center justify-between mb-4">
+    <span id="stCount" class="text-zinc-500 text-sm"></span>
+    <button
+        onclick="openAdd()"
+        class="inline-flex items-center gap-2 px-4 py-2 bg-violet-600 hover:bg-violet-500 text-white text-sm font-medium rounded-none transition-colors"
+    >
+        + Add Station
+    </button>
+</div>
+<div class="bg-zinc-900 border border-zinc-800 rounded-none overflow-hidden">
+    <table class="w-full text-sm">
+        <thead>
+            <tr
+                class="bg-zinc-800/60 text-zinc-500 text-xs uppercase tracking-wider"
+            >
+                <th class="px-4 py-3 text-left font-medium">ID</th>
+                <th class="px-4 py-3 text-left font-medium">Station Name</th>
+                <th class="px-4 py-3 text-left font-medium">City</th>
+                <th class="px-4 py-3 text-left font-medium">State</th>
+                <th class="px-4 py-3 text-left font-medium">Actions</th>
+            </tr>
+        </thead>
+        <tbody id="stBody" class="divide-y divide-zinc-800"></tbody>
+    </table>
+</div>
+
+<div
+    class="modal-backdrop fixed inset-0 bg-black/70 backdrop-blur-sm z-50 flex items-center justify-center opacity-0 pointer-events-none"
+    id="stModal"
+>
+    <div
+        class="modal-box bg-zinc-900 border border-zinc-700 rounded-none p-8 w-full max-w-md translate-y-3 scale-95"
+    >
+        <div class="flex items-center justify-between mb-6">
+            <h3 class="font-display font-bold text-lg" id="stModalTitle">
+                Add Station
+            </h3>
+            <button
+                onclick="closeModal('stModal')"
+                class="text-zinc-500 hover:text-zinc-200 text-xl leading-none"
+            >
+                &times;
+            </button>
+        </div>
+        <div class="mb-4">
+            <label
+                class="block text-xs font-medium text-zinc-500 uppercase tracking-wider mb-1.5"
+                >Station Name</label
+            >
+            <input
+                id="f_station_name"
+                placeholder="Central Station"
+                class="w-full bg-zinc-800 border border-zinc-700 rounded-none px-3 py-2.5 text-sm focus:outline-none focus:border-violet-500 transition-colors"
+            />
+        </div>
+        <div class="grid grid-cols-2 gap-4 mb-6">
+            <div>
+                <label
+                    class="block text-xs font-medium text-zinc-500 uppercase tracking-wider mb-1.5"
+                    >City</label
+                >
+                <input
+                    id="f_city"
+                    placeholder="Singapore"
+                    class="w-full bg-zinc-800 border border-zinc-700 rounded-none px-3 py-2.5 text-sm focus:outline-none focus:border-violet-500 transition-colors"
+                />
+            </div>
+            <div>
+                <label
+                    class="block text-xs font-medium text-zinc-500 uppercase tracking-wider mb-1.5"
+                    >State</label
+                >
+                <input
+                    id="f_state_name"
+                    placeholder="Central"
+                    class="w-full bg-zinc-800 border border-zinc-700 rounded-none px-3 py-2.5 text-sm focus:outline-none focus:border-violet-500 transition-colors"
+                />
+            </div>
+        </div>
+        <div class="flex gap-3 justify-end">
+            <button
+                onclick="closeModal('stModal')"
+                class="px-4 py-2 text-sm rounded-none border border-zinc-700 text-zinc-400 hover:bg-zinc-800 hover:text-zinc-100 transition-colors"
+            >
+                Cancel
+            </button>
+            <button
+                onclick="saveSt()"
+                class="px-4 py-2 text-sm rounded-none bg-violet-600 hover:bg-violet-500 text-white font-medium transition-colors"
+            >
+                Save
+            </button>
+        </div>
+    </div>
+</div>
+{% endblock %} {% block scripts %}
+<script>
+    let stations = [],
+        editId = null;
+    async function load() {
+        stations = await api("/api/stations");
+        document.getElementById("stCount").textContent =
+            `${stations.length} stations`;
+        const body = document.getElementById("stBody");
+        if (!stations.length) {
+            body.innerHTML = `<tr><td colspan="5"><div class="text-center py-12 text-zinc-600">No stations yet.</div></td></tr>`;
+            return;
+        }
+        console.log(stations);
+        body.innerHTML = stations
+            .map(
+                (s) => `
+    <tr class="hover:bg-zinc-800/40 transition-colors">
+      <td class="px-4 py-3 text-zinc-600 text-xs">#${s.station_id}</td>
+      <td class="px-4 py-3 font-medium">${s.station_name}</td>
+      <td class="px-4 py-3 text-zinc-300">${s.city}</td>
+      <td class="px-4 py-3 text-zinc-300">${s.state_name}</td>
+      <td class="px-4 py-3"><div class="flex gap-2">
+        <button onclick="openEdit(${s.station_id})" class="px-3 py-1.5 text-xs rounded-md border border-zinc-700 text-zinc-400 hover:bg-zinc-800 hover:text-zinc-100 transition-colors">Edit</button>
+        <button onclick="del(${s.station_id},'${s.station_name}')" class="px-3 py-1.5 text-xs rounded-md border border-red-500/30 text-red-400 hover:bg-red-500/10 transition-colors">Delete</button>
+      </div></td>
+    </tr>
+  `,
+            )
+            .join("");
+    }
+    function openAdd() {
+        editId = null;
+        document.getElementById("stModalTitle").textContent = "Add Station";
+        ["f_station_name", "f_city", "f_state_name"].forEach(
+            (id) => (document.getElementById(id).value = ""),
+        );
+        openModal("stModal");
+    }
+    function openEdit(id) {
+        const s = stations.find((x) => x.station_id === id);
+        editId = id;
+        document.getElementById("stModalTitle").textContent = "Edit Station";
+        document.getElementById("f_station_name").value = s.station_name;
+        document.getElementById("f_city").value = s.city;
+        document.getElementById("f_state_name").value = s.state_name;
+        openModal("stModal");
+    }
+    async function saveSt() {
+        const body = {
+            station_name: document.getElementById("f_station_name").value,
+            city: document.getElementById("f_city").value,
+            state_name: document.getElementById("f_state_name").value,
+        };
+        if (!body.station_name || !body.city || !body.state_name) {
+            toast("Fill all fields", "error");
+            return;
+        }
+        if (editId) await api(`/api/stations/${editId}`, "PUT", body);
+        else await api("/api/stations", "POST", body);
+        closeModal("stModal");
+        toast(editId ? "Station updated" : "Station added");
+        load();
+    }
+    function del(id, name) {
+        showConfirm(`Delete station "${name}"?`, async () => {
+            await api(`/api/stations/${id}`, "DELETE");
+            toast("Station deleted");
+            load();
+        });
+    }
+    load();
+</script>
+{% endblock %}

@@ -1,0 +1,206 @@
+{% extends "base.html" %} {% block title %}Book Ticket — RailBooker{% endblock
+%} {% block content %}
+<div class="mb-8">
+    <h1 class="font-display font-bold text-2xl tracking-tight">
+        Book a Ticket
+    </h1>
+    <p class="text-zinc-500 text-sm mt-1">
+        Select a route and fill in your details
+    </p>
+</div>
+
+<div class="grid grid-cols-2 gap-8 items-start">
+    <!-- Route cards -->
+    <div>
+        <h2
+            class="font-display font-semibold text-sm text-zinc-400 uppercase tracking-wider mb-4"
+        >
+            Available Routes
+        </h2>
+        <div id="routeCards"></div>
+    </div>
+
+    <!-- Booking form -->
+    <div>
+        <h2
+            class="font-display font-semibold text-sm text-zinc-400 uppercase tracking-wider mb-4"
+        >
+            Passenger Details
+        </h2>
+        <div class="bg-zinc-900 border border-zinc-800 rounded-none p-6">
+            <div
+                id="selectedRoute"
+                class="hidden mb-5 p-4 bg-zinc-800 rounded-none border-l-2 border-violet-500"
+            >
+                <div
+                    class="text-xs text-zinc-500 uppercase tracking-wider mb-1"
+                >
+                    Selected Route
+                </div>
+                <div id="selRouteText" class="font-medium text-sm"></div>
+                <div
+                    id="selRoutePrice"
+                    class="text-violet-400 text-xs mt-1"
+                ></div>
+            </div>
+            <div id="noRouteMsg" class="text-zinc-600 text-sm mb-5">
+                ← Select a route first
+            </div>
+
+            <div class="grid grid-cols-2 gap-4 mb-4">
+                <div>
+                    <label
+                        class="block text-xs font-medium text-zinc-500 uppercase tracking-wider mb-1.5"
+                        >First Name</label
+                    >
+                    <input
+                        id="b_first"
+                        placeholder="Jane"
+                        class="w-full bg-zinc-800 border border-zinc-700 rounded-none px-3 py-2.5 text-sm focus:outline-none focus:border-violet-500 transition-colors"
+                    />
+                </div>
+                <div>
+                    <label
+                        class="block text-xs font-medium text-zinc-500 uppercase tracking-wider mb-1.5"
+                        >Last Name</label
+                    >
+                    <input
+                        id="b_last"
+                        placeholder="Doe"
+                        class="w-full bg-zinc-800 border border-zinc-700 rounded-none px-3 py-2.5 text-sm focus:outline-none focus:border-violet-500 transition-colors"
+                    />
+                </div>
+            </div>
+            <div class="mb-4">
+                <label
+                    class="block text-xs font-medium text-zinc-500 uppercase tracking-wider mb-1.5"
+                    >Email</label
+                >
+                <input
+                    id="b_email"
+                    type="email"
+                    placeholder="jane@example.com"
+                    class="w-full bg-zinc-800 border border-zinc-700 rounded-none px-3 py-2.5 text-sm focus:outline-none focus:border-violet-500 transition-colors"
+                />
+            </div>
+            <div class="mb-4">
+                <label
+                    class="block text-xs font-medium text-zinc-500 uppercase tracking-wider mb-1.5"
+                    >Phone</label
+                >
+                <input
+                    id="b_phone"
+                    placeholder="+65 9000 0000"
+                    class="w-full bg-zinc-800 border border-zinc-700 rounded-none px-3 py-2.5 text-sm focus:outline-none focus:border-violet-500 transition-colors"
+                />
+            </div>
+            <div class="mb-6">
+                <label
+                    class="block text-xs font-medium text-zinc-500 uppercase tracking-wider mb-1.5"
+                    >Seat Number</label
+                >
+                <input
+                    id="b_seat"
+                    placeholder="A12"
+                    class="w-full bg-zinc-800 border border-zinc-700 rounded-none px-3 py-2.5 text-sm focus:outline-none focus:border-violet-500 transition-colors"
+                />
+            </div>
+            <button
+                onclick="bookNow()"
+                class="w-full py-2.5 bg-violet-600 hover:bg-violet-500 text-white text-sm font-medium rounded-none transition-colors"
+            >
+                Confirm Booking
+            </button>
+        </div>
+    </div>
+</div>
+{% endblock %} {% block scripts %}
+<script>
+    let routes = [],
+        selectedRouteId = null;
+    async function load() {
+        routes = await api("/api/routes");
+        const cont = document.getElementById("routeCards");
+        if (!routes.length) {
+            cont.innerHTML = `<div class="text-center py-12 text-zinc-600">No routes available. Add routes first.</div>`;
+            return;
+        }
+        cont.innerHTML = routes
+            .map(
+                (r) => `
+    <div class="route-card group bg-zinc-900 border border-zinc-800 rounded-none p-4 mb-3 cursor-pointer hover:border-zinc-600 hover:bg-zinc-800/60 transition-all" id="rc_${r.route_id}" onclick="selectRoute(${r.route_id})">
+      <div class="flex items-center justify-between mb-2">
+        <div class="font-medium text-sm">${r.dep_name} <span class="text-zinc-500 mx-1">→</span> ${r.arr_name}</div>
+        <div class="font-display font-bold text-violet-400">${r.ticket_price ? "$" + parseFloat(r.ticket_price).toFixed(2) : "—"}</div>
+      </div>
+      <div class="text-xs text-zinc-500">${r.train_name || "No train"} · ${r.departure_time} – ${r.arrival_time} · ${r.dep_city} → ${r.arr_city}</div>
+    </div>
+  `,
+            )
+            .join("");
+    }
+    function selectRoute(id) {
+        document
+            .querySelectorAll(".route-card")
+            .forEach((el) =>
+                el.classList.remove("!border-violet-500", "!bg-violet-500/5"),
+            );
+        document
+            .getElementById("rc_" + id)
+            .classList.add("!border-violet-500", "!bg-violet-500/5");
+        selectedRouteId = id;
+        const r = routes.find((x) => x.route_id === id);
+        document.getElementById("selRouteText").textContent =
+            `${r.dep_name} → ${r.arr_name} (${r.departure_time} – ${r.arrival_time})`;
+        document.getElementById("selRoutePrice").textContent = r.ticket_price
+            ? `$${parseFloat(r.ticket_price).toFixed(2)} per seat`
+            : "";
+        document.getElementById("selectedRoute").classList.remove("hidden");
+        document.getElementById("noRouteMsg").classList.add("hidden");
+    }
+    async function bookNow() {
+        if (!selectedRouteId) {
+            toast("Select a route first", "error");
+            return;
+        }
+        const body = {
+            route_id: selectedRouteId,
+            first_name: document.getElementById("b_first").value.trim(),
+            last_name: document.getElementById("b_last").value.trim(),
+            email: document.getElementById("b_email").value.trim(),
+            phone_no: document.getElementById("b_phone").value.trim(),
+            seat_no: document.getElementById("b_seat").value.trim(),
+        };
+        if (
+            !body.first_name ||
+            !body.last_name ||
+            !body.email ||
+            !body.seat_no
+        ) {
+            toast("Please fill all required fields", "error");
+            return;
+        }
+        const res = await api("/api/book", "POST", body);
+        if (res.ok) {
+            toast("Booking confirmed! Status: pending");
+            ["b_first", "b_last", "b_email", "b_phone", "b_seat"].forEach(
+                (id) => (document.getElementById(id).value = ""),
+            );
+            selectedRouteId = null;
+            document
+                .querySelectorAll(".route-card")
+                .forEach((el) =>
+                    el.classList.remove(
+                        "!border-violet-500",
+                        "!bg-violet-500/5",
+                    ),
+                );
+            document.getElementById("selectedRoute").classList.add("hidden");
+            document.getElementById("noRouteMsg").classList.remove("hidden");
+        } else {
+            toast("Booking failed", "error");
+        }
+    }
+    load();
+</script>
+{% endblock %}

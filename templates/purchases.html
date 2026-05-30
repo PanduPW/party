@@ -1,0 +1,174 @@
+{% extends "base.html" %} {% block title %}Purchases — RailBooker{% endblock %}
+{% block content %}
+<div class="mb-8">
+    <h1 class="font-display font-bold text-2xl tracking-tight">Purchases</h1>
+    <p class="text-zinc-500 text-sm mt-1">
+        View and manage all ticket purchases
+    </p>
+</div>
+<div class="flex items-center justify-between mb-4">
+    <div class="flex items-center gap-3">
+        <span id="purchaseCount" class="text-zinc-500 text-sm"></span>
+        <div class="flex gap-1">
+            {% for f in ['all','pending','paid','canceled'] %}
+            <button
+                onclick="setFilter('{{f}}',this)"
+                data-filter="{{f}}"
+                class="filter-btn px-3 py-1.5 text-xs rounded-md border border-zinc-700 text-zinc-400 hover:bg-zinc-800 transition-colors {% if f=='all' %}!bg-violet-600 !text-white !border-violet-600{% endif %}"
+            >
+                {{f|capitalize}}
+            </button>
+            {% endfor %}
+        </div>
+    </div>
+</div>
+<div class="bg-zinc-900 border border-zinc-800 rounded-none overflow-hidden">
+    <table class="w-full text-sm">
+        <thead>
+            <tr
+                class="bg-zinc-800/60 text-zinc-500 text-xs uppercase tracking-wider"
+            >
+                <th class="px-4 py-3 text-left font-medium">ID</th>
+                <th class="px-4 py-3 text-left font-medium">Passenger</th>
+                <th class="px-4 py-3 text-left font-medium">Route</th>
+                <th class="px-4 py-3 text-left font-medium">Train</th>
+                <th class="px-4 py-3 text-left font-medium">Seat</th>
+                <th class="px-4 py-3 text-left font-medium">Date</th>
+                <th class="px-4 py-3 text-left font-medium">Status</th>
+                <th class="px-4 py-3 text-left font-medium">Actions</th>
+            </tr>
+        </thead>
+        <tbody id="purBody" class="divide-y divide-zinc-800"></tbody>
+    </table>
+</div>
+
+<!-- Status Modal -->
+<div
+    class="modal-backdrop fixed inset-0 bg-black/70 backdrop-blur-sm z-50 flex items-center justify-center opacity-0 pointer-events-none"
+    id="statusModal"
+>
+    <div
+        class="modal-box bg-zinc-900 border border-zinc-700 rounded-none p-8 w-full max-w-sm translate-y-3 scale-95"
+    >
+        <div class="flex items-center justify-between mb-6">
+            <h3 class="font-display font-bold text-lg">Update Status</h3>
+            <button
+                onclick="closeModal('statusModal')"
+                class="text-zinc-500 hover:text-zinc-200 text-xl leading-none"
+            >
+                &times;
+            </button>
+        </div>
+        <div class="mb-6">
+            <label
+                class="block text-xs font-medium text-zinc-500 uppercase tracking-wider mb-1.5"
+                >Purchase #<span id="statusPurchaseId"></span
+            ></label>
+            <select
+                id="f_status"
+                class="w-full bg-zinc-800 border border-zinc-700 rounded-none px-3 py-2.5 text-sm focus:outline-none focus:border-violet-500 transition-colors"
+            >
+                <option value="pending">Pending</option>
+                <option value="paid">Paid</option>
+                <option value="canceled">Canceled</option>
+            </select>
+        </div>
+        <div class="flex gap-3 justify-end">
+            <button
+                onclick="closeModal('statusModal')"
+                class="px-4 py-2 text-sm rounded-none border border-zinc-700 text-zinc-400 hover:bg-zinc-800 hover:text-zinc-100 transition-colors"
+            >
+                Cancel
+            </button>
+            <button
+                onclick="saveStatus()"
+                class="px-4 py-2 text-sm rounded-none bg-violet-600 hover:bg-violet-500 text-white font-medium transition-colors"
+            >
+                Update
+            </button>
+        </div>
+    </div>
+</div>
+{% endblock %} {% block scripts %}
+<script>
+    let purchases = [],
+        currentFilter = "all",
+        editStatusId = null;
+    const statusCls = (s) =>
+        ({
+            pending: "bg-blue-500/15 text-blue-400",
+            paid: "bg-emerald-500/15 text-emerald-400",
+            canceled: "bg-red-500/15 text-red-400",
+        })[s] || "";
+    async function load() {
+        purchases = await api("/api/purchases");
+        render();
+    }
+    function setFilter(f, el) {
+        currentFilter = f;
+        document.querySelectorAll(".filter-btn").forEach((b) => {
+            b.classList.remove(
+                "!bg-violet-600",
+                "!text-white",
+                "!border-violet-600",
+            );
+        });
+        el.classList.add("!bg-violet-600", "!text-white", "!border-violet-600");
+        render();
+    }
+    function render() {
+        const list =
+            currentFilter === "all"
+                ? purchases
+                : purchases.filter((p) => p.status === currentFilter);
+        document.getElementById("purchaseCount").textContent =
+            `${list.length} of ${purchases.length} purchases`;
+        const body = document.getElementById("purBody");
+        if (!list.length) {
+            body.innerHTML = `<tr><td colspan="8"><div class="text-center py-12 text-zinc-600">No purchases found.</div></td></tr>`;
+            return;
+        }
+        body.innerHTML = list
+            .map(
+                (p) => `
+    <tr class="hover:bg-zinc-800/40 transition-colors">
+      <td class="px-4 py-3 text-zinc-600 text-xs">#${p.purchase_id}</td>
+      <td class="px-4 py-3"><div class="font-medium">${p.first_name} ${p.last_name}</div><div class="text-xs text-zinc-500">${p.email}</div></td>
+      <td class="px-4 py-3 text-xs"><div class="text-zinc-300">${p.dep_name} → ${p.arr_name}</div><div class="text-zinc-500">${p.departure_time} – ${p.arrival_time}</div></td>
+      <td class="px-4 py-3 text-zinc-400 text-xs">${p.train_name || "—"}</td>
+      <td class="px-4 py-3 font-medium">${p.seat_no}</td>
+      <td class="px-4 py-3 text-zinc-500 text-xs">${p.purchase_date_status}</td>
+      <td class="px-4 py-3"><span class="inline-flex px-2.5 py-0.5 rounded-full text-xs font-medium ${statusCls(p.status)}">${p.status}</span></td>
+      <td class="px-4 py-3"><div class="flex gap-2">
+        <button onclick="openStatus(${p.purchase_id},'${p.status}')" class="px-3 py-1.5 text-xs rounded-md border border-zinc-700 text-zinc-400 hover:bg-zinc-800 hover:text-zinc-100 transition-colors">Status</button>
+        <button onclick="del(${p.purchase_id})" class="px-3 py-1.5 text-xs rounded-md border border-red-500/30 text-red-400 hover:bg-red-500/10 transition-colors">Delete</button>
+      </div></td>
+    </tr>
+  `,
+            )
+            .join("");
+    }
+    function openStatus(id, status) {
+        editStatusId = id;
+        document.getElementById("statusPurchaseId").textContent = id;
+        document.getElementById("f_status").value = status;
+        openModal("statusModal");
+    }
+    async function saveStatus() {
+        await api(`/api/purchases/${editStatusId}/status`, "PUT", {
+            status: document.getElementById("f_status").value,
+        });
+        closeModal("statusModal");
+        toast("Status updated");
+        load();
+    }
+    function del(id) {
+        showConfirm(`Delete purchase #${id}?`, async () => {
+            await api(`/api/purchases/${id}`, "DELETE");
+            toast("Purchase deleted");
+            load();
+        });
+    }
+    load();
+</script>
+{% endblock %}

@@ -1,0 +1,5 @@
+schema.sql
+untuk list semua table
+
+seed.sql
+untuk insert data awal
