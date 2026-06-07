@@ -1,127 +1,179 @@
 {% extends "base.html" %} {% block title %}Routes — RailBooker{% endblock %} {%
 block content %}
 <div class="mb-8">
-    <h1 class="font-display font-bold text-2xl tracking-tight">Routes</h1>
+    <h1 class="font-display font-bold text-2xl tracking-tight text-zinc-950">
+        Transit Line Schedules
+    </h1>
     <p class="text-zinc-500 text-sm mt-1">
-        Manage train routes between stations
+        Configure operational track segments, manage station connections, and
+        assign locomotive payloads
     </p>
 </div>
+
 <div class="flex items-center justify-between mb-4">
-    <span id="rtCount" class="text-zinc-500 text-sm"></span>
+    <span id="rtCount" class="text-zinc-500 text-sm font-medium"></span>
     <button
         onclick="openAdd()"
-        class="inline-flex items-center gap-2 px-4 py-2 bg-violet-600 hover:bg-violet-500 text-white text-sm font-medium rounded-none transition-colors"
+        class="px-4 py-2 bg-zinc-900 hover:bg-zinc-800 text-white text-xs font-semibold uppercase tracking-wider font-mono transition-colors rounded-none"
     >
-        + Add Route
+        + Add Route Segment
     </button>
 </div>
-<div class="bg-white border border-zinc-200 rounded-none overflow-hidden">
-    <table class="w-full text-sm">
+
+<div
+    class="bg-white border border-zinc-200 rounded-none overflow-x-auto shadow-sm"
+>
+    <table class="w-full text-sm text-left">
         <thead>
             <tr
-                class="bg-zinc-100 text-zinc-500 text-xs uppercase tracking-wider"
+                class="bg-zinc-50 text-zinc-400 text-xs uppercase tracking-wider font-mono border-b border-zinc-200"
             >
-                <th class="px-4 py-3 text-left font-medium">ID</th>
-                <th class="px-4 py-3 text-left font-medium">Departure</th>
-                <th class="px-4 py-3 text-left font-medium">Arrival</th>
-                <th class="px-4 py-3 text-left font-medium">Train</th>
-                <th class="px-4 py-3 text-left font-medium">Departs</th>
-                <th class="px-4 py-3 text-left font-medium">Arrives</th>
-                <th class="px-4 py-3 text-left font-medium">Actions</th>
+                <th class="px-4 py-3 font-semibold">ID</th>
+                <th class="px-4 py-3 font-semibold">Departure Node</th>
+                <th class="px-4 py-3 font-semibold">Arrival Node</th>
+                <th class="px-4 py-3 font-semibold">Assigned Train</th>
+                <th class="px-4 py-3 font-semibold">Departs</th>
+                <th class="px-4 py-3 font-semibold">Arrives</th>
+                <th class="px-4 py-3 font-semibold">Base Price</th>
+                <th class="px-4 py-3 text-right font-semibold">Actions</th>
             </tr>
         </thead>
-        <tbody id="rtBody" class="divide-y divide-zinc-200"></tbody>
+        <tbody
+            id="rtBody"
+            class="divide-y divide-zinc-100 font-normal text-zinc-950"
+        >
+            <tr>
+                <td
+                    colspan="8"
+                    class="py-12 text-center text-zinc-400 text-sm font-mono animate-pulse"
+                >
+                    Syncing route tracking matrices...
+                </td>
+            </tr>
+        </tbody>
     </table>
 </div>
 
 <div
-    class="modal-backdrop fixed inset-0 bg-black/70 backdrop-blur-sm z-50 flex items-center justify-center opacity-0 pointer-events-none"
+    class="modal-backdrop fixed inset-0 bg-zinc-950/60 backdrop-blur-sm z-50 flex items-center justify-center opacity-0 pointer-events-none transition-opacity duration-150"
     id="rtModal"
 >
     <div
-        class="modal-box bg-white border border-zinc-200 rounded-none p-8 w-full max-w-md translate-y-3 scale-95"
+        class="modal-box bg-white border border-zinc-200 rounded-none p-6 w-full max-w-md transform scale-95 transition-transform duration-150 shadow-md"
     >
-        <div class="flex items-center justify-between mb-6">
-            <h3 class="font-display font-bold text-lg" id="rtModalTitle">
-                Add Route
+        <div
+            class="flex items-center justify-between mb-5 border-b border-zinc-100 pb-3"
+        >
+            <h3
+                class="font-display font-bold text-base text-zinc-950"
+                id="rtModalTitle"
+            >
+                Add Route Segment
             </h3>
             <button
                 onclick="closeModal('rtModal')"
-                class="text-zinc-500 hover:text-zinc-700 text-xl leading-none"
+                class="text-zinc-400 hover:text-zinc-600 font-sans text-xl font-light leading-none"
             >
                 &times;
             </button>
         </div>
-        <div class="grid grid-cols-2 gap-4 mb-4">
-            <div>
-                <label
-                    class="block text-xs font-medium text-zinc-500 uppercase tracking-wider mb-1.5"
-                    >Departure Station</label
-                >
-                <select
-                    id="f_dep_st"
-                    class="w-full bg-white border border-zinc-200 rounded-none px-3 py-2.5 text-sm focus:outline-none focus:border-violet-500 transition-colors"
-                ></select>
+
+        <div class="flex flex-col gap-4 text-xs">
+            <div class="grid grid-cols-2 gap-4">
+                <div class="flex flex-col gap-1.5">
+                    <label
+                        class="block text-xs font-mono font-medium text-zinc-400 uppercase tracking-wider"
+                    >
+                        Departure Station *
+                    </label>
+                    <select
+                        id="f_dep_st"
+                        class="w-full border border-zinc-200 bg-white px-3 py-2 text-sm focus:outline-none focus:border-zinc-950 rounded-none text-zinc-900 h-[38px]"
+                    ></select>
+                </div>
+                <div class="flex flex-col gap-1.5">
+                    <label
+                        class="block text-xs font-mono font-medium text-zinc-400 uppercase tracking-wider"
+                    >
+                        Arrival Station *
+                    </label>
+                    <select
+                        id="f_arr_st"
+                        class="w-full border border-zinc-200 bg-white px-3 py-2 text-sm focus:outline-none focus:border-zinc-950 rounded-none text-zinc-900 h-[38px]"
+                    ></select>
+                </div>
             </div>
-            <div>
-                <label
-                    class="block text-xs font-medium text-zinc-500 uppercase tracking-wider mb-1.5"
-                    >Arrival Station</label
-                >
-                <select
-                    id="f_arr_st"
-                    class="w-full bg-white border border-zinc-200 rounded-none px-3 py-2.5 text-sm focus:outline-none focus:border-violet-500 transition-colors"
-                ></select>
+
+            <div class="grid grid-cols-2 gap-4">
+                <div class="flex flex-col gap-1.5">
+                    <label
+                        class="block text-xs font-mono font-medium text-zinc-400 uppercase tracking-wider"
+                    >
+                        Departure Time *
+                    </label>
+                    <input
+                        id="f_dep_time"
+                        type="time"
+                        class="w-full border border-zinc-200 bg-white px-3 py-2 text-sm focus:outline-none focus:border-zinc-950 rounded-none text-zinc-900"
+                    />
+                </div>
+                <div class="flex flex-col gap-1.5">
+                    <label
+                        class="block text-xs font-mono font-medium text-zinc-400 uppercase tracking-wider"
+                    >
+                        Arrival Time *
+                    </label>
+                    <input
+                        id="f_arr_time"
+                        type="time"
+                        class="w-full border border-zinc-200 bg-white px-3 py-2 text-sm focus:outline-none focus:border-zinc-950 rounded-none text-zinc-900"
+                    />
+                </div>
+            </div>
+
+            <div class="grid grid-cols-2 gap-4">
+                <div class="flex flex-col gap-1.5">
+                    <label
+                        class="block text-xs font-mono font-medium text-zinc-400 uppercase tracking-wider"
+                    >
+                        Assign Locomotive *
+                    </label>
+                    <select
+                        id="f_train_id"
+                        class="w-full border border-zinc-200 bg-white px-3 py-2 text-sm focus:outline-none focus:border-zinc-950 rounded-none text-zinc-900 h-[38px]"
+                    ></select>
+                </div>
+                <div class="flex flex-col gap-1.5">
+                    <label
+                        class="block text-xs font-mono font-medium text-zinc-400 uppercase tracking-wider"
+                    >
+                        Ticket Base Value (IDR) *
+                    </label>
+                    <input
+                        id="f_ticket_price"
+                        type="number"
+                        step="0.01"
+                        placeholder="0.00"
+                        class="w-full border border-zinc-200 bg-white px-3 py-2 text-sm focus:outline-none focus:border-zinc-950 rounded-none text-zinc-900"
+                    />
+                </div>
             </div>
         </div>
-        <div class="grid grid-cols-2 gap-4 mb-4">
-            <div>
-                <label
-                    class="block text-xs font-medium text-zinc-500 uppercase tracking-wider mb-1.5"
-                    >Departure Time</label
-                >
-                <input
-                    id="f_dep_time"
-                    type="time"
-                    class="w-full bg-white border border-zinc-200 rounded-none px-3 py-2.5 text-sm focus:outline-none focus:border-violet-500 transition-colors"
-                />
-            </div>
-            <div>
-                <label
-                    class="block text-xs font-medium text-zinc-500 uppercase tracking-wider mb-1.5"
-                    >Arrival Time</label
-                >
-                <input
-                    id="f_arr_time"
-                    type="time"
-                    class="w-full bg-white border border-zinc-200 rounded-none px-3 py-2.5 text-sm focus:outline-none focus:border-violet-500 transition-colors"
-                />
-            </div>
-        </div>
-        <div class="mb-6">
-            <label
-                class="block text-xs font-medium text-zinc-500 uppercase tracking-wider mb-1.5"
-                >Train (optional)</label
-            >
-            <select
-                id="f_train_id"
-                class="w-full bg-white border border-zinc-200 rounded-none px-3 py-2.5 text-sm focus:outline-none focus:border-violet-500 transition-colors"
-            >
-                <option value="">— None —</option>
-            </select>
-        </div>
-        <div class="flex gap-3 justify-end">
+
+        <div
+            class="flex gap-2 justify-end text-xs mt-6 pt-4 border-t border-zinc-100"
+        >
             <button
                 onclick="closeModal('rtModal')"
-                class="px-4 py-2 text-sm rounded-none border border-zinc-200 text-zinc-700 hover:bg-zinc-100 transition-colors"
+                class="px-4 py-2 border border-zinc-200 text-zinc-500 hover:bg-zinc-50 transition-colors rounded-none"
             >
                 Cancel
             </button>
             <button
                 onclick="saveRt()"
-                class="px-4 py-2 text-sm rounded-none bg-violet-600 hover:bg-violet-500 text-white font-medium transition-colors"
+                class="px-4 py-2 bg-zinc-900 hover:bg-zinc-800 text-white font-medium transition-colors rounded-none"
             >
-                Save
+                Commit Route
             </button>
         </div>
     </div>
@@ -132,106 +184,193 @@ block content %}
         stations = [],
         trains = [],
         editId = null;
+
     async function load() {
-        [routes, stations, trains] = await Promise.all([
-            api("/api/routes"),
-            api("/api/stations"),
-            api("/api/trains"),
-        ]);
-        document.getElementById("rtCount").textContent =
-            `${routes.length} routes`;
-        const stOpts = stations
-            .map(
-                (s) =>
-                    `<option value="${s.station_id}">${s.station_name} (${s.city})</option>`,
-            )
-            .join("");
-        document.getElementById("f_dep_st").innerHTML = stOpts;
-        document.getElementById("f_arr_st").innerHTML = stOpts;
-        document.getElementById("f_train_id").innerHTML =
-            '<option value="">— None —</option>' +
-            trains
+        try {
+            [routes, stations, trains] = await Promise.all([
+                api("/api/routes"),
+                api("/api/stations"),
+                api("/api/trains"),
+            ]);
+
+            document.getElementById("rtCount").textContent =
+                `${routes.length} Active System Routes`;
+
+            const stOpts = stations
                 .map(
-                    (t) =>
-                        `<option value="${t.train_id}">${t.train_name}</option>`,
+                    (s) =>
+                        `<option value="${s.station_id}">${s.station_name} (${s.city})</option>`,
                 )
                 .join("");
-        const body = document.getElementById("rtBody");
-        if (!routes.length) {
-            body.innerHTML = `<tr><td colspan="7"><div class="text-center py-12 text-zinc-400">No routes yet.</div></td></tr>`;
-            return;
+
+            document.getElementById("f_dep_st").innerHTML = stOpts;
+            document.getElementById("f_arr_st").innerHTML = stOpts;
+
+            document.getElementById("f_train_id").innerHTML = trains
+                .map(
+                    (t) =>
+                        `<option value="${t.train_id}">${t.train_name} [${t.train_type}]</option>`,
+                )
+                .join("");
+
+            const body = document.getElementById("rtBody");
+            if (!routes.length) {
+                body.innerHTML = `<tr><td colspan="8"><div class="text-center py-12 text-zinc-400 text-sm font-mono">No network schedules configured.</div></td></tr>`;
+                return;
+            }
+
+            body.innerHTML = routes
+                .map((r) => {
+                    const formattedDep = r.departure_time
+                        ? r.departure_time.substring(0, 5)
+                        : "00:00";
+                    const formattedArr = r.arrival_time
+                        ? r.arrival_time.substring(0, 5)
+                        : "00:00";
+                    const priceDisplay = r.ticket_price ?? 0;
+
+                    return `
+                        <tr class="hover:bg-zinc-50/60 transition-colors">
+                          <td class="px-4 py-2.5 font-mono text-xs text-zinc-400">#${r.route_id}</td>
+                          <td class="px-4 py-2.5"><div class="font-medium text-zinc-900">${r.dep_name}</div><div class="text-xs text-zinc-400 font-mono">${r.dep_city}</div></td>
+                          <td class="px-4 py-2.5"><div class="font-medium text-zinc-900">${r.arr_name}</div><div class="text-xs text-zinc-400 font-mono">${r.arr_city}</div></td>
+                          <td class="px-4 py-2.5">
+                            <span class="inline-flex px-2 py-0.5 text-[10px] border border-zinc-950 uppercase font-mono font-medium bg-zinc-900 text-white rounded-none">
+                                ${r.train_name || "Unassigned"}
+                            </span>
+                          </td>
+                          <td class="px-4 py-2.5 text-zinc-600 font-mono text-xs">${formattedDep}</td>
+                          <td class="px-4 py-2.5 text-zinc-600 font-mono text-xs">${formattedArr}</td>
+                          <td class="px-4 py-2.5 text-zinc-900 font-mono text-xs font-semibold">Rp${priceDisplay}</td>
+                          <td class="px-4 py-2.5 text-right whitespace-nowrap">
+                            <div class="flex gap-2 justify-end text-xs">
+                              <button onclick="openEdit(${r.route_id})" class="px-2 py-1 border border-zinc-200 text-zinc-600 hover:border-zinc-900 transition-all rounded-none">Edit</button>
+                              <button onclick="del(${r.route_id})" class="px-2 py-1 border border-red-100 text-red-500 hover:bg-red-50 transition-all rounded-none">Delete</button>
+                            </div>
+                          </td>
+                        </tr>`;
+                })
+                .join("");
+        } catch (err) {
+            toast(
+                "Failed to synchronize component infrastructure elements.",
+                "error",
+            );
         }
-        body.innerHTML = routes
-            .map(
-                (r) => `
-    <tr class="hover:bg-zinc-50 transition-colors">
-      <td class="px-4 py-3 text-zinc-500 text-xs">#${r.route_id}</td>
-      <td class="px-4 py-3"><div class="font-medium">${r.dep_name}</div><div class="text-xs text-zinc-500">${r.dep_city}</div></td>
-      <td class="px-4 py-3"><div class="font-medium">${r.arr_name}</div><div class="text-xs text-zinc-500">${r.arr_city}</div></td>
-      <td class="px-4 py-3">${r.train_name ? `<span class="inline-flex px-2.5 py-0.5 rounded-full text-xs font-medium bg-violet-100 text-violet-600">${r.train_name}</span>` : '<span class="text-zinc-500">—</span>'}</td>
-      <td class="px-4 py-3 text-zinc-700 tabular-nums text-xs">${r.departure_time}</td>
-      <td class="px-4 py-3 text-zinc-700 tabular-nums text-xs">${r.arrival_time}</td>
-      <td class="px-4 py-3"><div class="flex gap-2">
-        <button onclick="openEdit(${r.route_id})" class="px-3 py-1.5 text-xs rounded-md border border-zinc-200 text-zinc-700 hover:bg-zinc-100 transition-colors">Edit</button>
-        <button onclick="del(${r.route_id})" class="px-3 py-1.5 text-xs rounded-md border border-red-100 text-red-500 hover:bg-red-50 transition-colors">Delete</button>
-      </div></td>
-    </tr>
-  `,
-            )
-            .join("");
     }
+
+    function openModal(id) {
+        const m = document.getElementById(id);
+        m.classList.remove("opacity-0", "pointer-events-none");
+    }
+
+    // Fixed layout scale transforms inside baseline animation chains
+    function closeModal(id) {
+        const m = document.getElementById(id);
+        m.classList.add("opacity-0", "pointer-events-none");
+    }
+
     function openAdd() {
         editId = null;
-        document.getElementById("rtModalTitle").textContent = "Add Route";
+        document.getElementById("rtModalTitle").textContent =
+            "Add Route Segment";
         document.getElementById("f_dep_time").value = "";
         document.getElementById("f_arr_time").value = "";
-        document.getElementById("f_train_id").value = "";
+        document.getElementById("f_ticket_price").value = "";
+        if (trains.length)
+            document.getElementById("f_train_id").value = trains[0].train_id;
         openModal("rtModal");
     }
+
     function openEdit(id) {
         const r = routes.find((x) => x.route_id === id);
+        if (!r) return;
+
         editId = id;
-        document.getElementById("rtModalTitle").textContent = "Edit Route";
+        document.getElementById("rtModalTitle").textContent =
+            `Modify Route Configuration [ID: ${id}]`;
         document.getElementById("f_dep_st").value = r.departure_station_id;
         document.getElementById("f_arr_st").value = r.arrival_station_id;
-        document.getElementById("f_dep_time").value = r.departure_time;
-        document.getElementById("f_arr_time").value = r.arrival_time;
-        document.getElementById("f_train_id").value = r.train_id || "";
+        document.getElementById("f_dep_time").value = r.departure_time
+            ? r.departure_time.substring(0, 5)
+            : "";
+        document.getElementById("f_arr_time").value = r.arrival_time
+            ? r.arrival_time.substring(0, 5)
+            : "";
+        document.getElementById("f_train_id").value = r.train_id;
+        document.getElementById("f_ticket_price").value = r.ticket_price;
         openModal("rtModal");
     }
+
     async function saveRt() {
         const body = {
             departure_station_id: parseInt(
                 document.getElementById("f_dep_st").value,
+                10,
             ),
             arrival_station_id: parseInt(
                 document.getElementById("f_arr_st").value,
+                10,
             ),
             departure_time: document.getElementById("f_dep_time").value,
             arrival_time: document.getElementById("f_arr_time").value,
-            train_id: document.getElementById("f_train_id").value || null,
+            train_id: parseInt(document.getElementById("f_train_id").value, 10),
+            ticket_price: parseFloat(
+                document.getElementById("f_ticket_price").value,
+            ),
         };
-        if (!body.departure_time || !body.arrival_time) {
-            toast("Fill departure and arrival times", "error");
+
+        if (
+            !body.departure_time ||
+            !body.arrival_time ||
+            isNaN(body.ticket_price) ||
+            isNaN(body.train_id)
+        ) {
+            toast("All runtime scheduling metrics must be specified.", "error");
             return;
         }
         if (body.departure_station_id === body.arrival_station_id) {
-            toast("Departure and arrival must differ", "error");
+            toast(
+                "Departure and arrival stations cannot be the same.",
+                "error",
+            );
             return;
         }
-        if (editId) await api(`/api/routes/${editId}`, "PUT", body);
-        else await api("/api/routes", "POST", body);
-        closeModal("rtModal");
-        toast(editId ? "Route updated" : "Route added");
-        load();
-    }
-    function del(id) {
-        showConfirm("Delete this route?", async () => {
-            await api(`/api/routes/${id}`, "DELETE");
-            toast("Route deleted");
+
+        try {
+            if (editId) {
+                await api(`/api/routes/${editId}`, "PUT", body);
+                toast("Network routing segment adjusted.", "success");
+            } else {
+                await api("/api/routes", "POST", body);
+                toast("New line path operationalized successfully.", "success");
+            }
+            closeModal("rtModal");
             load();
-        });
+        } catch (e) {
+            toast(
+                "An infrastructure alteration framework fault occurred.",
+                "error",
+            );
+        }
     }
+
+    async function del(id) {
+        if (
+            confirm(
+                "Permanently drop route connectivity reference and drop historical segments?",
+            )
+        ) {
+            try {
+                await api(`/api/routes/${id}`, "DELETE");
+                toast("Route path cleared from index tracking.", "success");
+                load();
+            } catch (e) {
+                toast("Failed to drop systemic line segments.", "error");
+            }
+        }
+    }
+
     load();
 </script>
 {% endblock %}

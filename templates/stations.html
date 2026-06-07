@@ -1,177 +1,209 @@
-{% extends "base.html" %} {% block title %}Stations — RailBooker{% endblock %}
+{% extends "base.html" %} 
+{% block title %}Stations — RailBooker{% endblock %}
+
 {% block content %}
 <div class="mb-8">
-    <h1 class="font-display font-bold text-2xl tracking-tight">Stations</h1>
+    <h1 class="font-display font-bold text-2xl tracking-tight text-zinc-950">
+        Transit Stations Registry
+    </h1>
     <p class="text-zinc-500 text-sm mt-1">
-        Manage departure and arrival stations
+        Manage platform parameters, operational terminals, and arrival/departure locations
     </p>
 </div>
+
 <div class="flex items-center justify-between mb-4">
-    <span id="stCount" class="text-zinc-500 text-sm"></span>
+    <span id="stCount" class="text-zinc-500 text-sm font-medium"></span>
     <button
         onclick="openAdd()"
-        class="inline-flex items-center gap-2 px-4 py-2 bg-violet-600 hover:bg-violet-500 text-white text-sm font-medium rounded-none transition-colors"
+        class="px-4 py-2 bg-zinc-900 hover:bg-zinc-800 text-white text-xs font-semibold uppercase tracking-wider font-mono transition-colors rounded-none"
     >
-        + Add Station
+        + Add Station Node
     </button>
 </div>
-<div class="bg-white border border-zinc-200 rounded-none overflow-hidden">
-    <table class="w-full text-sm">
+
+<div class="bg-white border border-zinc-200 rounded-none overflow-x-auto shadow-sm">
+    <table class="w-full text-sm text-left">
         <thead>
-            <tr
-                class="bg-zinc-100 text-zinc-500 text-xs uppercase tracking-wider"
-            >
-                <th class="px-4 py-3 text-left font-medium">ID</th>
-                <th class="px-4 py-3 text-left font-medium">Station Name</th>
-                <th class="px-4 py-3 text-left font-medium">City</th>
-                <th class="px-4 py-3 text-left font-medium">State</th>
-                <th class="px-4 py-3 text-left font-medium">Actions</th>
+            <tr class="bg-zinc-50 text-zinc-400 text-xs uppercase tracking-wider font-mono border-b border-zinc-200">
+                <th class="px-4 py-3 font-semibold">Station ID</th>
+                <th class="px-4 py-3 font-semibold">Station Designation</th>
+                <th class="px-4 py-3 font-semibold">City Location</th>
+                <th class="px-4 py-3 text-right font-semibold">Actions</th>
             </tr>
         </thead>
-        <tbody id="stBody" class="divide-y divide-zinc-200"></tbody>
+        <tbody id="stBody" class="divide-y divide-zinc-100 font-normal text-zinc-950">
+            <tr>
+                <td colspan="4" class="py-12 text-center text-zinc-400 text-sm font-mono animate-pulse">
+                    Syncing station grid nodes...
+                </td>
+            </tr>
+        </tbody>
     </table>
 </div>
 
 <div
-    class="modal-backdrop fixed inset-0 bg-black/70 backdrop-blur-sm z-50 flex items-center justify-center opacity-0 pointer-events-none"
+    class="modal-backdrop fixed inset-0 bg-zinc-950/60 backdrop-blur-sm z-50 flex items-center justify-center opacity-0 pointer-events-none transition-opacity duration-150"
     id="stModal"
 >
     <div
-        class="modal-box bg-white border border-zinc-200 rounded-none p-8 w-full max-w-md translate-y-3 scale-95"
+        class="modal-box bg-white border border-zinc-200 rounded-none p-6 w-full max-w-sm transform scale-95 transition-transform duration-150 shadow-md"
     >
-        <div class="flex items-center justify-between mb-6">
-            <h3 class="font-display font-bold text-lg" id="stModalTitle">
-                Add Station
+        <div class="flex items-center justify-between mb-5 border-b border-zinc-100 pb-3">
+            <h3 class="font-display font-bold text-base text-zinc-950" id="stModalTitle">
+                Add Station Node
             </h3>
             <button
                 onclick="closeModal('stModal')"
-                class="text-zinc-500 hover:text-zinc-800 text-xl leading-none"
+                class="text-zinc-400 hover:text-zinc-600 font-sans text-xl font-light leading-none"
             >
                 &times;
             </button>
         </div>
-        <div class="mb-4">
-            <label
-                class="block text-xs font-medium text-zinc-500 uppercase tracking-wider mb-1.5"
-                >Station Name</label
-            >
-            <input
-                id="f_station_name"
-                placeholder="Central Station"
-                class="w-full bg-white border border-zinc-200 rounded-none px-3 py-2.5 text-sm focus:outline-none focus:border-violet-500 transition-colors"
-            />
-        </div>
-        <div class="grid grid-cols-2 gap-4 mb-6">
-            <div>
-                <label
-                    class="block text-xs font-medium text-zinc-500 uppercase tracking-wider mb-1.5"
-                    >City</label
-                >
+        
+        <div class="flex flex-col gap-4 text-xs">
+            <div class="flex flex-col gap-1.5">
+                <label class="block text-xs font-mono font-medium text-zinc-400 uppercase tracking-wider">
+                    Station Name Designation *
+                </label>
+                <input
+                    id="f_station_name"
+                    type="text"
+                    placeholder="e.g. Tanjong Pagar Central"
+                    class="w-full border border-zinc-200 bg-white px-3 py-2 text-sm focus:outline-none focus:border-zinc-950 rounded-none"
+                />
+            </div>
+            
+            <div class="flex flex-col gap-1.5">
+                <label class="block text-xs font-mono font-medium text-zinc-400 uppercase tracking-wider">
+                    City Location *
+                </label>
                 <input
                     id="f_city"
-                    placeholder="Singapore"
-                    class="w-full bg-white border border-zinc-200 rounded-none px-3 py-2.5 text-sm focus:outline-none focus:border-violet-500 transition-colors"
-                />
-            </div>
-            <div>
-                <label
-                    class="block text-xs font-medium text-zinc-500 uppercase tracking-wider mb-1.5"
-                    >State</label
-                >
-                <input
-                    id="f_state_name"
-                    placeholder="Central"
-                    class="w-full bg-white border border-zinc-200 rounded-none px-3 py-2.5 text-sm focus:outline-none focus:border-violet-500 transition-colors"
+                    type="text"
+                    placeholder="e.g. Singapore"
+                    class="w-full border border-zinc-200 bg-white px-3 py-2 text-sm focus:outline-none focus:border-zinc-950 rounded-none"
                 />
             </div>
         </div>
-        <div class="flex gap-3 justify-end">
+
+        <div class="flex gap-2 justify-end text-xs mt-6 pt-4 border-t border-zinc-100">
             <button
                 onclick="closeModal('stModal')"
-                class="px-4 py-2 text-sm rounded-none border border-zinc-200 text-zinc-800 hover:bg-zinc-100 hover:text-zinc-900 transition-colors"
+                class="px-4 py-2 border border-zinc-200 text-zinc-500 hover:bg-zinc-50 transition-colors rounded-none"
             >
                 Cancel
             </button>
             <button
                 onclick="saveSt()"
-                class="px-4 py-2 text-sm rounded-none bg-violet-600 hover:bg-violet-500 text-white font-medium transition-colors"
+                class="px-4 py-2 bg-zinc-900 hover:bg-zinc-800 text-white font-medium transition-colors rounded-none"
             >
-                Save
+                Commit Station
             </button>
         </div>
     </div>
 </div>
-{% endblock %} {% block scripts %}
+{% endblock %}
+
+{% block scripts %}
 <script>
-    let stations = [],
-        editId = null;
+    let stations = [], editId = null;
+
     async function load() {
         stations = await api("/api/stations");
-        document.getElementById("stCount").textContent =
-            `${stations.length} stations`;
+        document.getElementById("stCount").textContent = `${stations.length} Station Nodes Profiled`;
         const body = document.getElementById("stBody");
+        
         if (!stations.length) {
-            body.innerHTML = `<tr><td colspan="5"><div class="text-center py-12 text-zinc-600">No stations yet.</div></td></tr>`;
+            body.innerHTML = `<tr><td colspan="4"><div class="text-center py-12 text-zinc-400 text-sm font-mono">No network stations mapped.</div></td></tr>`;
             return;
         }
-        console.log(stations);
+        
         body.innerHTML = stations
             .map(
                 (s) => `
-    <tr class="hover:bg-zinc-100 transition-colors">
-      <td class="px-4 py-3 text-zinc-600 text-xs">#${s.station_id}</td>
-      <td class="px-4 py-3 font-medium">${s.station_name}</td>
-      <td class="px-4 py-3 text-zinc-800">${s.city}</td>
-      <td class="px-4 py-3 text-zinc-800">${s.state_name}</td>
-      <td class="px-4 py-3"><div class="flex gap-2">
-        <button onclick="openEdit(${s.station_id})" class="px-3 py-1.5 text-xs rounded-md border border-zinc-200 text-zinc-800 hover:bg-zinc-100 hover:text-zinc-900 transition-colors">Edit</button>
-        <button onclick="del(${s.station_id},'${s.station_name}')" class="px-3 py-1.5 text-xs rounded-md border border-red-200 text-red-500 hover:bg-red-50 transition-colors">Delete</button>
-      </div></td>
-    </tr>
-  `,
+            <tr class="hover:bg-zinc-50/60 transition-colors">
+                <td class="px-4 py-2.5 font-mono text-xs text-zinc-400">#${s.station_id}</td>
+                <td class="px-4 py-2.5 font-medium text-zinc-900">${s.station_name}</td>
+                <td class="px-4 py-2.5 text-zinc-700">${s.city}</td>
+                <td class="px-4 py-2.5 text-right whitespace-nowrap">
+                    <div class="flex gap-2 justify-end text-xs">
+                        <button onclick="openEdit(${s.station_id})" class="px-2 py-1 border border-zinc-200 text-zinc-600 hover:border-zinc-900 transition-all rounded-none">Edit</button>
+                        <button onclick="del(${s.station_id},'${s.station_name}')" class="px-2 py-1 border border-red-100 text-red-500 hover:bg-red-50 transition-all rounded-none">Delete</button>
+                    </div>
+                </td>
+            </tr>
+        `
             )
             .join("");
     }
+
+    function openModal(id) {
+        const m = document.getElementById(id);
+        m.classList.remove("opacity-0", "pointer-events-none");
+        m.querySelector(".modal-box").classList.remove("scale-95", "translate-y-3");
+    }
+
+    function closeModal(id) {
+        const m = document.getElementById(id);
+        m.classList.add("opacity-0", "pointer-events-none");
+        m.querySelector(".modal-box").classList.add("scale-95", "translate-y-3");
+    }
+
     function openAdd() {
         editId = null;
-        document.getElementById("stModalTitle").textContent = "Add Station";
-        ["f_station_name", "f_city", "f_state_name"].forEach(
-            (id) => (document.getElementById(id).value = ""),
-        );
+        document.getElementById("stModalTitle").textContent = "Add Station Node";
+        document.getElementById("f_station_name").value = "";
+        document.getElementById("f_city").value = "";
         openModal("stModal");
     }
+
     function openEdit(id) {
         const s = stations.find((x) => x.station_id === id);
         editId = id;
-        document.getElementById("stModalTitle").textContent = "Edit Station";
+        document.getElementById("stModalTitle").textContent = `Modify Station Node [ID: ${id}]`;
         document.getElementById("f_station_name").value = s.station_name;
         document.getElementById("f_city").value = s.city;
-        document.getElementById("f_state_name").value = s.state_name;
         openModal("stModal");
     }
+
     async function saveSt() {
         const body = {
-            station_name: document.getElementById("f_station_name").value,
-            city: document.getElementById("f_city").value,
-            state_name: document.getElementById("f_state_name").value,
+            station_name: document.getElementById("f_station_name").value.trim(),
+            city: document.getElementById("f_city").value.trim(),
         };
-        if (!body.station_name || !body.city || !body.state_name) {
-            toast("Fill all fields", "error");
+        
+        if (!body.station_name || !body.city) {
+            toast("All mandatory mapping parameters must be populated.", "error");
             return;
         }
-        if (editId) await api(`/api/stations/${editId}`, "PUT", body);
-        else await api("/api/stations", "POST", body);
-        closeModal("stModal");
-        toast(editId ? "Station updated" : "Station added");
-        load();
-    }
-    function del(id, name) {
-        showConfirm(`Delete station "${name}"?`, async () => {
-            await api(`/api/stations/${id}`, "DELETE");
-            toast("Station deleted");
+        
+        try {
+            if (editId) {
+                await api(`/api/stations/${editId}`, "PUT", body);
+                toast("Station parameters updated.", "success");
+            } else {
+                await api("/api/stations", "POST", body);
+                toast("New base station added to network runtime.", "success");
+            }
+            closeModal("stModal");
             load();
+        } catch(e) {
+            toast("An infrastructure alteration framework fault occurred.", "error");
+        }
+    }
+
+    function del(id, name) {
+        showConfirm(`Permanently unbind and remove station node "${name}" from system trace index?`, async () => {
+            try {
+                await api(`/api/stations/${id}`, "DELETE");
+                toast("Station trace dropped successfully.", "success");
+                load();
+            } catch(e) {
+                toast("Failed dropping node connection strings.", "error");
+            }
         });
     }
+
     load();
 </script>
 {% endblock %}

@@ -1,174 +1,268 @@
 {% extends "base.html" %} {% block title %}Purchases — RailBooker{% endblock %}
 {% block content %}
 <div class="mb-8">
-    <h1 class="font-display font-bold text-2xl tracking-tight">Purchases</h1>
+    <h1 class="font-display font-bold text-2xl tracking-tight text-zinc-950">
+        Purchases
+    </h1>
     <p class="text-zinc-500 text-sm mt-1">
         View and manage all ticket purchases
     </p>
 </div>
 <div class="flex items-center justify-between mb-4">
     <div class="flex items-center gap-3">
-        <span id="purchaseCount" class="text-zinc-500 text-sm"></span>
+        <span
+            id="purchaseCount"
+            class="text-zinc-500 text-sm font-medium"
+        ></span>
         <div class="flex gap-1">
             {% for f in ['all','pending','paid','canceled'] %}
-            <button
-                onclick="setFilter('{{f}}',this)"
-                data-filter="{{f}}"
-                class="filter-btn px-3 py-1.5 text-xs rounded-md border border-zinc-700 text-zinc-400 hover:bg-zinc-800 transition-colors {% if f=='all' %}!bg-violet-600 !text-white !border-violet-600{% endif %}"
-            >
+            <button onclick="setFilter('{{f}}',this)" class="...">
                 {{f|capitalize}}
             </button>
             {% endfor %}
         </div>
     </div>
 </div>
-<div class="bg-white border border-zinc-200 rounded-none overflow-hidden">
-    <table class="w-full text-sm">
+<div
+    class="bg-white border border-zinc-200 rounded-none overflow-x-auto shadow-sm"
+>
+    <table class="w-full text-sm text-left">
         <thead>
             <tr
-                class="bg-zinc-100 text-zinc-500 text-xs uppercase tracking-wider"
+                class="bg-zinc-50 text-zinc-400 text-xs uppercase tracking-wider font-mono border-b border-zinc-200"
             >
-                <th class="px-4 py-3 text-left font-medium">ID</th>
-                <th class="px-4 py-3 text-left font-medium">Passenger</th>
-                <th class="px-4 py-3 text-left font-medium">Route</th>
-                <th class="px-4 py-3 text-left font-medium">Train</th>
-                <th class="px-4 py-3 text-left font-medium">Seat</th>
-                <th class="px-4 py-3 text-left font-medium">Date</th>
-                <th class="px-4 py-3 text-left font-medium">Status</th>
-                <th class="px-4 py-3 text-left font-medium">Actions</th>
+                <th class="px-4 py-3 font-semibold">Ticket ID</th>
+                <th class="px-4 py-3 font-semibold">Passenger</th>
+                <th class="px-4 py-3 font-semibold">Line Segment</th>
+                <th class="px-4 py-3 font-semibold">Train Vehicle</th>
+                <th class="px-4 py-3 font-semibold">Issued Date</th>
+                <th class="px-4 py-3 font-semibold">Status</th>
+                {% if session.get('role') in ['admin', 'superadmin'] %}
+                <th class="px-4 py-3 font-semibold">Actions</th>
+                {% endif %}
             </tr>
         </thead>
-        <tbody id="purBody" class="divide-y divide-zinc-200"></tbody>
+        <tbody
+            id="purBody"
+            class="divide-y divide-zinc-100 font-normal"
+        ></tbody>
     </table>
 </div>
 
-<!-- Status Modal -->
 <div
-    class="modal-backdrop fixed inset-0 bg-black/70 backdrop-blur-sm z-50 flex items-center justify-center opacity-0 pointer-events-none"
+    class="modal-backdrop fixed inset-0 bg-zinc-950/60 backdrop-blur-sm z-50 flex items-center justify-center opacity-0 pointer-events-none transition-opacity duration-150"
     id="statusModal"
 >
     <div
-        class="modal-box bg-white border border-zinc-200 rounded-none p-8 w-full max-w-sm translate-y-3 scale-95"
+        class="modal-box bg-white border border-zinc-200 rounded-none p-6 w-full max-w-sm transform scale-95 transition-transform duration-150 shadow-md"
     >
-        <div class="flex items-center justify-between mb-6">
-            <h3 class="font-display font-bold text-lg">Update Status</h3>
+        <div class="flex items-center justify-between mb-5">
+            <h3 class="font-display font-bold text-base text-zinc-950">
+                Update Ticket Status
+            </h3>
             <button
                 onclick="closeModal('statusModal')"
-                class="text-zinc-500 hover:text-zinc-700 text-xl leading-none"
+                class="text-zinc-400 hover:text-zinc-600 font-sans text-xl font-light"
             >
                 &times;
             </button>
         </div>
-        <div class="mb-6">
+        <div class="mb-5">
             <label
-                class="block text-xs font-medium text-zinc-500 uppercase tracking-wider mb-1.5"
-                >Purchase #<span id="statusPurchaseId"></span
-            ></label>
-            <select
-                id="f_status"
-                class="w-full bg-white border border-zinc-200 rounded-none px-3 py-2.5 text-sm focus:outline-none focus:border-violet-500 transition-colors"
+                class="block text-xs font-mono font-medium text-zinc-400 uppercase tracking-wider mb-2"
             >
+                Ticket #<span id="statusPurchaseId"></span>
+            </label>
+            <select id="f_status" class="...">
                 <option value="pending">Pending</option>
                 <option value="paid">Paid</option>
                 <option value="canceled">Canceled</option>
             </select>
         </div>
-        <div class="flex gap-3 justify-end">
+        <div class="flex gap-2 justify-end text-xs">
             <button
                 onclick="closeModal('statusModal')"
-                class="px-4 py-2 text-sm rounded-none border border-zinc-200 text-zinc-500 hover:bg-zinc-100 hover:text-zinc-700 transition-colors"
+                class="px-4 py-2 border border-zinc-200 text-zinc-500 hover:bg-zinc-50 transition-colors rounded-none"
             >
                 Cancel
             </button>
             <button
                 onclick="saveStatus()"
-                class="px-4 py-2 text-sm rounded-none bg-violet-600 hover:bg-violet-500 text-white font-medium transition-colors"
+                class="px-4 py-2 bg-zinc-900 hover:bg-zinc-800 text-white font-medium transition-colors rounded-none"
             >
-                Update
+                Update State
             </button>
         </div>
     </div>
 </div>
 {% endblock %} {% block scripts %}
 <script>
-    let purchases = [],
-        currentFilter = "all",
-        editStatusId = null;
-    const statusCls = (s) =>
-        ({
-            pending: "bg-blue-500/15 text-blue-600",
-            paid: "bg-emerald-500/15 text-emerald-600",
-            canceled: "bg-red-500/15 text-red-600",
-        })[s] || "";
+    let purchases = [], currentFilter = "all", editStatusId = null;
+
+    // User Role context checked safely for selective actions row rendering
+    const isAdministrativeAccount = {% if session.get('role') in ['admin', 'superadmin'] %} true {% else %} false {% endif %};
+
+    const statusCls = (s) => ({
+        pending: "bg-amber-50 text-amber-700 border-amber-200",
+        paid: "bg-emerald-50 text-emerald-700 border-emerald-200",
+        canceled: "bg-red-50 text-red-600 border-red-200",
+    })[s] || "bg-zinc-100 text-zinc-600";
+
     async function load() {
         purchases = await api("/api/purchases");
         render();
     }
+
     function setFilter(f, el) {
         currentFilter = f;
         document.querySelectorAll(".filter-btn").forEach((b) => {
-            b.classList.remove(
-                "!bg-violet-600",
-                "!text-white",
-                "!border-violet-600",
-            );
+            b.className = "filter-btn px-3 py-1.5 text-xs rounded-none border border-zinc-200 bg-white text-zinc-600 hover:bg-zinc-50 hover:border-zinc-400 transition-colors";
         });
-        el.classList.add("!bg-violet-600", "!text-white", "!border-violet-600");
+        el.className = "filter-btn px-3 py-1.5 text-xs rounded-none bg-zinc-900 text-white border-zinc-950 transition-colors";
         render();
     }
+
     function render() {
-        const list =
-            currentFilter === "all"
-                ? purchases
-                : purchases.filter((p) => p.status === currentFilter);
-        document.getElementById("purchaseCount").textContent =
-            `${list.length} of ${purchases.length} purchases`;
+        const list = currentFilter === "all" ? purchases : purchases.filter((p) => p.status === currentFilter);
+        document.getElementById("purchaseCount").textContent = `${list.length} of ${purchases.length} profiles`;
+    
         const body = document.getElementById("purBody");
+        // Ensure the Actions column header renders if an admin OR a pending customer needs it
+        const bodyHasActions = isAdministrativeAccount || list.some(p => p.status === "pending");
+    
         if (!list.length) {
-            body.innerHTML = `<tr><td colspan="8"><div class="text-center py-12 text-zinc-500">No purchases found.</div></td></tr>`;
+            body.innerHTML = `<tr><td colspan="7"><div class="text-center py-12 text-zinc-400 text-sm">No ticket records verified.</div></td></tr>`;
             return;
         }
+    
         body.innerHTML = list
-            .map(
-                (p) => `
-    <tr class="hover:bg-zinc-50 transition-colors">
-      <td class="px-4 py-3 text-zinc-600 text-xs">#${p.purchase_id}</td>
-      <td class="px-4 py-3"><div class="font-medium">${p.first_name} ${p.last_name}</div><div class="text-xs text-zinc-500">${p.email}</div></td>
-      <td class="px-4 py-3 text-xs"><div class="text-zinc-700">${p.dep_name} → ${p.arr_name}</div><div class="text-zinc-500">${p.departure_time} – ${p.arrival_time}</div></td>
-      <td class="px-4 py-3 text-zinc-600 text-xs">${p.train_name || "—"}</td>
-      <td class="px-4 py-3 font-medium">${p.seat_no}</td>
-      <td class="px-4 py-3 text-zinc-500 text-xs">${p.purchase_date_status}</td>
-      <td class="px-4 py-3"><span class="inline-flex px-2.5 py-0.5 rounded-full text-xs font-medium ${statusCls(p.status)}">${p.status}</span></td>
-      <td class="px-4 py-3"><div class="flex gap-2">
-        <button onclick="openStatus(${p.purchase_id},'${p.status}')" class="px-3 py-1.5 text-xs rounded-md border border-zinc-200 text-zinc-500 hover:bg-zinc-100 hover:text-zinc-700 transition-colors">Status</button>
-        <button onclick="del(${p.purchase_id})" class="px-3 py-1.5 text-xs rounded-md border border-red-200 text-red-500 hover:bg-red-50 transition-colors">Delete</button>
-      </div></td>
-    </tr>
-  `,
-            )
-            .join("");
+            .map((p) => {
+                const purchaseDateStr = p.purchase_date ? new Date(p.purchase_date).toLocaleDateString('id-ID') : '—';
+    
+                // --- REFACTORED ACTIONS CELL MATRIX ---
+                let actionsCell = "";
+                if (isAdministrativeAccount) {
+                    // Admin Actions Form
+                    actionsCell = `
+                        <td class="px-4 py-2.5">
+                            <div class="flex gap-1.5">
+                                <button onclick="openStatus(${p.ticket_id},'${p.status}')" class="px-2 py-1 text-xs border border-zinc-200 text-zinc-600 hover:border-zinc-900 transition-all rounded-none">Status</button>
+                                <button onclick="del(${p.ticket_id})" class="px-2 py-1 text-xs border border-red-100 text-red-500 hover:bg-red-50 transition-all rounded-none">Delete</button>
+                            </div>
+                        </td>`;
+                } else if (p.status === "pending") {
+                    // Standard User Action Form (Only available while state is Pending)
+                    actionsCell = `
+                        <td class="px-4 py-2.5">
+                            <div class="flex gap-1.5">
+                                <button onclick="payTicket(${p.ticket_id})" class="px-2 py-1 text-xs bg-emerald-600 hover:bg-emerald-700 text-white font-medium transition-all rounded-none">Pay Now</button>
+                                <button onclick="cancelTicket(${p.ticket_id})" class="px-2 py-1 text-xs border border-zinc-200 text-zinc-500 hover:text-zinc-800 transition-all rounded-none">Cancel</button>
+                            </div>
+                        </td>`;
+                } else if (bodyHasActions) {
+                    // Empty spacer cell to keep column alignments stable for non-pending items
+                    actionsCell = `<td class="px-4 py-2.5 text-zinc-400 text-xs italic">No actions available</td>`;
+                }
+    
+                return `
+                    <tr class="hover:bg-zinc-50/60 transition-colors">
+                      <td class="px-4 py-2.5 font-mono text-xs text-zinc-400">#${p.ticket_id}</td>
+                      <td class="px-4 py-2.5">
+                        <div class="font-medium text-zinc-900">${p.first_name || 'My'} ${p.last_name || 'Account'}</div>
+                        <div class="text-xs text-zinc-400">${p.email || ''}</div>
+                      </td>
+                      <td class="px-4 py-2.5 text-xs font-medium text-zinc-800">
+                        <div class="text-sm font-bold text-zinc-900">${p.dep_name} <span class="text-zinc-400 font-normal mx-0.5">→</span> ${p.arr_name}</div>
+                        <div class="text-zinc-400 font-mono mt-0.5">${p.departure_time ? p.departure_time.substring(0,5) : '—'} - ${p.arrival_time ? p.arrival_time.substring(0,5) : '—'}</div>
+                      </td>
+                      <td class="px-4 py-2.5 text-zinc-600 text-xs font-medium">${p.train_name || "Transit Shuttle"}</td>
+                      <td class="px-4 py-2.5 text-zinc-500 text-xs font-mono">${purchaseDateStr}</td>
+                      <td class="px-4 py-2.5">
+                        <span class="inline-flex px-2.5 py-0.5 text-[11px] border uppercase tracking-wider font-mono font-medium ${statusCls(p.status)}">
+                            ${p.status}
+                        </span>
+                      </td>
+                      ${actionsCell}
+                    </tr>
+                `;
+            }).join("");
     }
+    // Modal Control Overrides to accommodate custom utility systems safely
+    function openModal(id) {
+        const m = document.getElementById(id);
+        m.classList.remove("opacity-0", "pointer-events-none");
+        m.querySelector(".modal-box").classList.remove("scale-95", "translate-y-3");
+    }
+
+    function closeModal(id) {
+        const m = document.getElementById(id);
+        m.classList.add("opacity-0", "pointer-events-none");
+        m.querySelector(".modal-box").classList.add("scale-95", "translate-y-3");
+    }
+
     function openStatus(id, status) {
         editStatusId = id;
         document.getElementById("statusPurchaseId").textContent = id;
         document.getElementById("f_status").value = status;
         openModal("statusModal");
     }
+
     async function saveStatus() {
-        await api(`/api/purchases/${editStatusId}/status`, "PUT", {
-            status: document.getElementById("f_status").value,
-        });
-        closeModal("statusModal");
-        toast("Status updated");
-        load();
+        try {
+            const res = await api(`/api/purchases/${editStatusId}/status`, "PUT", {
+                status: document.getElementById("f_status").value,
+            });
+            closeModal("statusModal");
+            if (res.ok) {
+                toast("Ticket state successfully updated.", "success");
+                load();
+            }
+        } catch (e) {
+            toast("Failed to update status values.", "error");
+        }
     }
+
     function del(id) {
-        showConfirm(`Delete purchase #${id}?`, async () => {
-            await api(`/api/purchases/${id}`, "DELETE");
-            toast("Purchase deleted");
-            load();
-        });
+        if(confirm(`Permanently revoke and delete ticket trace #${id}?`)) {
+            api(`/api/purchases/${id}`, "DELETE").then(res => {
+                toast("Ticket record purged.", "success");
+                load();
+            }).catch(() => toast("Deletion unexecuted.", "error"));
+        }
     }
+
+    async function payTicket(id) {
+        if (confirm(`Authorize fare transaction for ticket #${id}?`)) {
+            try {
+                const res = await api(`/api/purchases/${id}/status`, "PUT", { status: "paid" });
+                if (res.ok) {
+                    toast("Payment processed successfully!", "success");
+                    load();
+                } else {
+                    toast(res.error || "Payment processing failed.", "error");
+                }
+            } catch (e) {
+                toast("Network error during payment execution.", "error");
+            }
+        }
+    }
+    
+    async function cancelTicket(id) {
+        if (confirm("Are you sure you want to cancel this pending ticket reservation?")) {
+            try {
+                const res = await api(`/api/purchases/${id}/status`, "PUT", { status: "canceled" });
+                if (res.ok) {
+                    toast("Ticket reservation canceled.", "success");
+                    load();
+                } else {
+                    toast(res.error || "Cancellation update failed.", "error");
+                }
+            } catch (e) {
+                toast("Network error during operation routing.", "error");
+            }
+        }
+    }
+
     load();
 </script>
 {% endblock %}

@@ -1,0 +1,269 @@
+{% extends "base.html" %}
+{% block title %}Manage Users — RailBooker{% endblock %}
+
+{% block content %}
+<div class="mb-8">
+    <h1 class="font-display font-bold text-2xl tracking-tight text-zinc-950">
+        Identity Registry Management
+    </h1>
+    <p class="text-zinc-500 text-sm mt-1">
+        Provision global admin profiles, adjust infrastructure security clearances, and inspect accounts
+    </p>
+</div>
+
+<div class="flex items-center justify-between mb-4">
+    <div class="flex items-center gap-3">
+        <span id="userCount" class="text-zinc-500 text-sm font-medium"></span>
+    </div>
+    <button onclick="openCreateModal()" class="px-4 py-2 bg-zinc-900 hover:bg-zinc-800 text-white text-xs font-semibold uppercase tracking-wider font-mono transition-colors rounded-none">
+        + Provision Account
+    </button>
+</div>
+
+<div class="bg-white border border-zinc-200 rounded-none overflow-x-auto shadow-sm">
+    <table class="w-full text-sm text-left">
+        <thead>
+            <tr class="bg-zinc-50 text-zinc-400 text-xs uppercase tracking-wider font-mono border-b border-zinc-200">
+                <th class="px-4 py-3 font-semibold">UID</th>
+                <th class="px-4 py-3 font-semibold">Full Name</th>
+                <th class="px-4 py-3 font-semibold">Email Address</th>
+                <th class="px-4 py-3 font-semibold">Phone Reference</th>
+                <th class="px-4 py-3 font-semibold">Matrix Clearance</th>
+                <th class="px-4 py-3 font-semibold text-right">Actions</th>
+            </tr>
+        </thead>
+        <tbody id="usersTableBody" class="divide-y divide-zinc-100 font-normal text-zinc-950">
+            <tr>
+                <td colspan="6" class="py-12 text-center text-zinc-400 text-sm font-mono animate-pulse">
+                    Syncing matrix schema values...
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+
+<div class="modal-backdrop fixed inset-0 bg-zinc-950/60 backdrop-blur-sm z-50 flex items-center justify-center opacity-0 pointer-events-none transition-opacity duration-150" id="userModal">
+    <div class="modal-box bg-white border border-zinc-200 rounded-none p-6 w-full max-w-md transform scale-95 transition-transform duration-150 shadow-md max-h-[90vh] overflow-y-auto">
+        <div class="flex items-center justify-between mb-5 border-b border-zinc-100 pb-3">
+            <h3 class="font-display font-bold text-base text-zinc-950" id="modalTitle">
+                Provision New Account Record
+            </h3>
+            <button onclick="closeUserModal()" class="text-zinc-400 hover:text-zinc-600 font-sans text-xl font-light leading-none">&times;</button>
+        </div>
+        
+        <form id="userForm" onsubmit="handleFormSubmit(event)" class="flex flex-col gap-4 text-xs">
+            <input type="hidden" id="formUserId" />
+            
+            <div class="grid grid-cols-2 gap-4">
+                <div class="flex flex-col gap-1.5">
+                    <label class="block text-xs font-mono font-medium text-zinc-400 uppercase tracking-wider" for="firstName">First Name *</label>
+                    <input type="text" id="firstName" required class="w-full border border-zinc-200 bg-white px-3 py-2 text-sm focus:outline-none focus:border-zinc-950 rounded-none" placeholder="e.g. John" />
+                </div>
+                <div class="flex flex-col gap-1.5">
+                    <label class="block text-xs font-mono font-medium text-zinc-400 uppercase tracking-wider" for="lastName">Last Name *</label>
+                    <input type="text" id="lastName" required class="w-full border border-zinc-200 bg-white px-3 py-2 text-sm focus:outline-none focus:border-zinc-950 rounded-none" placeholder="e.g. Doe" />
+                </div>
+            </div>
+
+            <div class="flex flex-col gap-1.5">
+                <label class="block text-xs font-mono font-medium text-zinc-400 uppercase tracking-wider" for="email">Identity Email Address *</label>
+                <input type="email" id="email" required class="w-full border border-zinc-200 bg-white px-3 py-2 text-sm focus:outline-none focus:border-zinc-950 rounded-none" placeholder="name@domain.com" />
+            </div>
+
+            <div class="flex flex-col gap-1.5">
+                <label class="block text-xs font-mono font-medium text-zinc-400 uppercase tracking-wider" for="password" id="passwordLabel">Cryptographic Passphrase *</label>
+                <input type="password" id="password" required class="w-full border border-zinc-200 bg-white px-3 py-2 text-sm focus:outline-none focus:border-zinc-950 rounded-none" placeholder="••••••••" />
+                <p class="text-zinc-400 text-[10px] italic mt-0.5" id="passwordHelp">Complex entropy sequence recommended.</p>
+            </div>
+
+            <div class="grid grid-cols-2 gap-4">
+                <div class="flex flex-col gap-1.5">
+                    <label class="block text-xs font-mono font-medium text-zinc-400 uppercase tracking-wider" for="phoneNo">Phone Reference No</label>
+                    <input type="text" id="phoneNo" class="w-full border border-zinc-200 bg-white px-3 py-2 text-sm focus:outline-none focus:border-zinc-950 rounded-none" placeholder="e.g. 081234567" />
+                </div>
+                <div class="flex flex-col gap-1.5">
+                    <label class="block text-xs font-mono font-medium text-zinc-400 uppercase tracking-wider" for="role">Clearance Tier *</label>
+                    <select id="role" required class="w-full border border-zinc-200 bg-white px-3 py-2 text-sm focus:outline-none focus:border-zinc-950 rounded-none h-[38px]">
+                        <option value="user">User (Passenger)</option>
+                        <option value="admin">Admin (Operator)</option>
+                        <option value="superadmin">Superadmin (Global)</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="flex gap-2 justify-end text-xs mt-4 pt-4 border-t border-zinc-100">
+                <button type="button" onclick="closeUserModal()" class="px-4 py-2 border border-zinc-200 text-zinc-500 hover:bg-zinc-50 transition-colors rounded-none">
+                    Cancel
+                </button>
+                <button type="submit" class="px-4 py-2 bg-zinc-900 hover:bg-zinc-800 text-white font-medium transition-colors rounded-none">
+                    Commit Record
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    let cachedUsersList = [];
+    const currentActiveSessionUid = parseInt("{{ session.get('user_id', 0) }}");
+
+    document.addEventListener("DOMContentLoaded", syncSystemUsersLedger);
+
+    async function syncSystemUsersLedger() {
+        const tableBody = document.getElementById("usersTableBody");
+        try {
+            const data = await api("/api/users", "GET");
+            if (data.error) {
+                toast(data.error, "error");
+                return;
+            }
+            cachedUsersList = data;
+            renderUsersGrid(data);
+        } catch (e) {
+            console.error(e);
+            tableBody.innerHTML = `<tr><td colspan="6" class="py-12 text-center text-red-500 font-mono text-sm">Failed linking to mapping variables runtime context.</td></tr>`;
+        }
+    }
+
+    function renderUsersGrid(users) {
+        document.getElementById("userCount").textContent = `${users.length} Identities Registered`;
+        const tableBody = document.getElementById("usersTableBody");
+        
+        if (users.length === 0) {
+            tableBody.innerHTML = `<tr><td colspan="6" class="py-12 text-center text-zinc-400 text-sm">No identity matrices synchronized.</td></tr>`;
+            return;
+        }
+
+        tableBody.innerHTML = users.map(u => {
+            const fullName = (u.first_name || u.last_name) ? `${u.first_name || ''} ${u.last_name || ''}`.trim() : '<span class="text-zinc-400 italic">No Profile Data</span>';
+            const phone = u.phone_no ? u.phone_no : '<span class="text-zinc-300 font-mono">—</span>';
+            
+            let badgeClass = "bg-zinc-100 text-zinc-700 border-zinc-200";
+            if (u.role === 'superadmin') badgeClass = "bg-purple-50 text-purple-700 border-purple-200";
+            else if (u.role === 'admin') badgeClass = "bg-blue-50 text-blue-700 border-blue-200";
+
+            const isSelfRecord = u.user_id === currentActiveSessionUid;
+
+            return `
+                <tr class="hover:bg-zinc-50/60 transition-colors">
+                    <td class="px-4 py-2.5 font-mono text-xs text-zinc-400">#${u.user_id}</td>
+                    <td class="px-4 py-2.5 font-medium text-zinc-900">${fullName}</td>
+                    <td class="px-4 py-2.5">
+                        <div class="font-medium text-zinc-800">${u.email}</div>
+                        ${isSelfRecord ? '<div class="inline-block text-[9px] font-mono font-bold text-emerald-700 bg-emerald-50 border border-emerald-200 px-1 mt-0.5 tracking-wider uppercase">Active Session Core</div>' : ''}
+                    </td>
+                    <td class="px-4 py-2.5 font-mono text-xs text-zinc-600">${phone}</td>
+                    <td class="px-4 py-2.5">
+                        <span class="inline-flex px-2 py-0.5 text-[11px] border uppercase tracking-wider font-mono font-medium rounded-none ${badgeClass}">
+                            ${u.role}
+                        </span>
+                    </td>
+                    <td class="px-4 py-2.5 text-right whitespace-nowrap">
+                        <div class="flex gap-2 justify-end text-xs">
+                            <button onclick="openEditModal(${u.user_id})" class="px-2 py-1 border border-zinc-200 text-zinc-600 hover:border-zinc-900 transition-all rounded-none">Edit</button>
+                            ${isSelfRecord ? 
+                                `<span class="px-2 py-1 text-zinc-300 italic cursor-not-allowed select-none">Locked</span>` : 
+                                `<button onclick="confirmPurgeIdentity(${u.user_id}, '${u.email}')" class="px-2 py-1 border border-red-100 text-red-500 hover:bg-red-50 transition-all rounded-none">Purge</button>`
+                            }
+                        </div>
+                    </td>
+                </tr>
+            `;
+        }).join('');
+    }
+
+    function openModal(id) {
+        const m = document.getElementById(id);
+        m.classList.remove("opacity-0", "pointer-events-none");
+        m.querySelector(".modal-box").classList.remove("scale-95", "translate-y-3");
+    }
+
+    function closeModal(id) {
+        const m = document.getElementById(id);
+        m.classList.add("opacity-0", "pointer-events-none");
+        m.querySelector(".modal-box").classList.add("scale-95", "translate-y-3");
+    }
+
+    function openCreateModal() {
+        document.getElementById("userForm").reset();
+        document.getElementById("formUserId").value = "";
+        document.getElementById("modalTitle").textContent = "Provision New Account Record";
+        document.getElementById("password").required = true;
+        document.getElementById("passwordLabel").textContent = "Cryptographic Passphrase *";
+        document.getElementById("passwordHelp").textContent = "Complex entropy sequence recommended.";
+        openModal("userModal");
+    }
+
+    function openEditModal(uid) {
+        const target = cachedUsersList.find(x => x.user_id === uid);
+        if (!target) return;
+
+        document.getElementById("formUserId").value = target.user_id;
+        document.getElementById("email").value = target.email;
+        document.getElementById("role").value = target.role;
+        document.getElementById("firstName").value = target.first_name || "";
+        document.getElementById("lastName").value = target.last_name || "";
+        document.getElementById("phoneNo").value = target.phone_no || "";
+        
+        document.getElementById("modalTitle").textContent = `Modify Profiling Matrix [UID: ${target.user_id}]`;
+        document.getElementById("password").required = false;
+        document.getElementById("password").value = "";
+        document.getElementById("passwordLabel").textContent = "Update Passphrase";
+        document.getElementById("passwordHelp").textContent = "Leave blank to retain existing key mappings.";
+        
+        openModal("userModal");
+    }
+
+    function closeUserModal() {
+        closeModal("userModal");
+    }
+
+    async function handleFormSubmit(e) {
+        e.preventDefault();
+        const uid = document.getElementById("formUserId").value;
+        
+        const payload = {
+            email: document.getElementById("email").value.trim(),
+            role: document.getElementById("role").value,
+            first_name: document.getElementById("firstName").value.trim(),
+            last_name: document.getElementById("lastName").value.trim(),
+            phone_no: document.getElementById("phoneNo").value.trim() || null
+        };
+
+        const passVal = document.getElementById("password").value;
+        if (passVal) payload.password = passVal;
+
+        const targetUrl = uid ? `/api/users/${uid}` : "/api/users";
+        const targetMethod = uid ? "PUT" : "POST";
+
+        try {
+            const res = await api(targetUrl, targetMethod, payload);
+            if (res.ok) {
+                toast(res.message || "Identity matrix record updated successfully.", "success");
+                closeUserModal();
+                syncSystemUsersLedger();
+            } else {
+                toast(res.error || "An infrastructure mutation fault occurred.", "error");
+            }
+        } catch (err) {
+            console.error(err);
+            toast("Connection transaction handling broken.", "error");
+        }
+    }
+
+    function confirmPurgeIdentity(uid, emailStr) {
+        if (confirm(`Are you absolutely sure you want to drop identity metadata mapping records for [${emailStr}]? Cascading dependencies will be structurally deleted.`)) {
+            api(`/api/users/${uid}`, "DELETE").then(res => {
+                if (res.ok) {
+                    toast(res.message || "Identity dropped from registry context.", "success");
+                    syncSystemUsersLedger();
+                } else {
+                    toast(res.error || "De-provisioning sequence execution aborted.", "error");
+                }
+            }).catch(() => toast("Internal transaction ledger error.", "error"));
+        }
+    }
+</script>
+{% endblock %}

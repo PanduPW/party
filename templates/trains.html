@@ -1,123 +1,143 @@
 {% extends "base.html" %} {% block title %}Trains — RailBooker{% endblock %} {%
 block content %}
 <div class="mb-8">
-    <h1 class="font-display font-bold text-2xl tracking-tight">Trains</h1>
-    <p class="text-zinc-500 text-sm mt-1">Manage your train fleet</p>
+    <h1 class="font-display font-bold text-2xl tracking-tight text-zinc-950">
+        Fleet Asset Management
+    </h1>
+    <p class="text-zinc-500 text-sm mt-1">
+        Provision locomotives, configure cabin sizing parameters, and audit
+        system train assets
+    </p>
 </div>
 
 <div class="flex items-center justify-between mb-4">
-    <span id="trainCount" class="text-zinc-500 text-sm"></span>
+    <span id="trainCount" class="text-zinc-500 text-sm font-medium"></span>
     <button
         onclick="openAdd()"
-        class="inline-flex items-center gap-2 px-4 py-2 bg-violet-600 hover:bg-violet-500 text-white text-sm font-medium rounded-none transition-colors"
+        class="px-4 py-2 bg-zinc-900 hover:bg-zinc-800 text-white text-xs font-semibold uppercase tracking-wider font-mono transition-colors rounded-none"
     >
-        + Add Train
+        + Add Fleet Vehicle
     </button>
 </div>
 
-<div class="bg-white border border-zinc-200 rounded-none overflow-hidden">
-    <table class="w-full text-sm">
+<div
+    class="bg-white border border-zinc-200 rounded-none overflow-x-auto shadow-sm"
+>
+    <table class="w-full text-sm text-left">
         <thead>
             <tr
-                class="bg-zinc-100 text-zinc-500 text-xs uppercase tracking-wider"
+                class="bg-zinc-50 text-zinc-400 text-xs uppercase tracking-wider font-mono border-b border-zinc-200"
             >
-                <th class="px-4 py-3 text-left font-medium">ID</th>
-                <th class="px-4 py-3 text-left font-medium">Name</th>
-                <th class="px-4 py-3 text-left font-medium">Type</th>
-                <th class="px-4 py-3 text-left font-medium">Seats</th>
-                <th class="px-4 py-3 text-left font-medium">Price</th>
-                <th class="px-4 py-3 text-left font-medium">Actions</th>
+                <th class="px-4 py-3 font-semibold">Train ID</th>
+                <th class="px-4 py-3 font-semibold">Vehicle Title</th>
+                <th class="px-4 py-3 font-semibold">Classification Type</th>
+                <th class="px-4 py-3 font-semibold">Total Seat Allotment</th>
+                <th class="px-4 py-3 text-right font-semibold">Actions</th>
             </tr>
         </thead>
-        <tbody id="trainBody" class="divide-y divide-zinc-200"></tbody>
+        <tbody
+            id="trainBody"
+            class="divide-y divide-zinc-100 font-normal text-zinc-950"
+        >
+            <tr>
+                <td
+                    colspan="5"
+                    class="py-12 text-center text-zinc-400 text-sm font-mono animate-pulse"
+                >
+                    Syncing locomotive cluster variables...
+                </td>
+            </tr>
+        </tbody>
     </table>
 </div>
 
-<!-- train modal -->
 <div
-    class="modal-backdrop fixed inset-0 bg-black/70 backdrop-blur-sm z-50 flex items-center justify-center opacity-0 pointer-events-none transition-opacity duration-200"
+    class="modal-backdrop fixed inset-0 bg-zinc-950/60 backdrop-blur-sm z-50 flex items-center justify-center opacity-0 pointer-events-none transition-opacity duration-150"
     id="trainModal"
 >
     <div
-        class="modal-box bg-white border border-zinc-200 rounded-none p-8 w-full max-w-md translate-y-3 scale-95 transition-all duration-200"
+        class="modal-box bg-white border border-zinc-200 rounded-none p-6 w-full max-w-sm transform scale-95 transition-transform duration-150 shadow-md"
         id="trainModalBox"
     >
-        <div class="flex items-center justify-between mb-6">
-            <h3 class="font-display font-bold text-lg" id="trainModalTitle">
-                Add Train
+        <div
+            class="flex items-center justify-between mb-5 border-b border-zinc-100 pb-3"
+        >
+            <h3
+                class="font-display font-bold text-base text-zinc-950"
+                id="trainModalTitle"
+            >
+                Add Train Asset
             </h3>
             <button
                 onclick="closeModal('trainModal')"
-                class="text-zinc-500 hover:text-zinc-700 text-xl leading-none"
+                class="text-zinc-400 hover:text-zinc-600 font-sans text-xl font-light leading-none"
             >
                 &times;
             </button>
         </div>
-        <div class="mb-4">
-            <label
-                class="block text-xs font-medium text-zinc-500 uppercase tracking-wider mb-1.5"
-                >Train Name</label
-            >
-            <input
-                id="f_train_name"
-                placeholder="Express 101"
-                class="w-full bg-white border border-zinc-200 rounded-none px-3 py-2.5 text-sm focus:outline-none focus:border-violet-500 transition-colors text-zinc-900"
-            />
-        </div>
-        <div class="grid grid-cols-2 gap-4 mb-4">
-            <div>
+
+        <div class="flex flex-col gap-4 text-xs">
+            <div class="flex flex-col gap-1.5">
                 <label
-                    class="block text-xs font-medium text-zinc-500 uppercase tracking-wider mb-1.5"
-                    >Type</label
+                    class="block text-xs font-mono font-medium text-zinc-400 uppercase tracking-wider"
                 >
-                <select
-                    id="f_train_type"
-                    class="w-full bg-white border border-zinc-200 rounded-none px-3 py-2.5 text-sm focus:outline-none focus:border-violet-500 transition-colors text-zinc-900"
-                >
-                    <option>Express</option>
-                    <option>Regional</option>
-                    <option>Night</option>
-                    <option>Intercity</option>
-                </select>
-            </div>
-            <div>
-                <label
-                    class="block text-xs font-medium text-zinc-500 uppercase tracking-wider mb-1.5"
-                    >Total Seats</label
-                >
+                    Train Asset Name *
+                </label>
                 <input
-                    id="f_total_seats"
-                    type="number"
-                    placeholder="200"
-                    class="w-full bg-white border border-zinc-200 rounded-none px-3 py-2.5 text-sm focus:outline-none focus:border-violet-500 transition-colors text-zinc-900"
+                    id="f_train_name"
+                    type="text"
+                    placeholder="e.g. Orient Express 101"
+                    class="w-full border border-zinc-200 bg-white px-3 py-2 text-sm focus:outline-none focus:border-zinc-950 rounded-none text-zinc-900"
                 />
             </div>
+
+            <div class="grid grid-cols-2 gap-4">
+                <div class="flex flex-col gap-1.5">
+                    <label
+                        class="block text-xs font-mono font-medium text-zinc-400 uppercase tracking-wider"
+                    >
+                        Classification *
+                    </label>
+                    <select
+                        id="f_train_type"
+                        class="w-full border border-zinc-200 bg-white px-3 py-2 text-sm focus:outline-none focus:border-zinc-950 rounded-none text-zinc-900 h-[38px]"
+                    >
+                        <option value="express">Express</option>
+                        <option value="regional">Regional</option>
+                        <option value="local">Local</option>
+                        <option value="intercity">Intercity</option>
+                    </select>
+                </div>
+                <div class="flex flex-col gap-1.5">
+                    <label
+                        class="block text-xs font-mono font-medium text-zinc-400 uppercase tracking-wider"
+                    >
+                        Total Seats *
+                    </label>
+                    <input
+                        id="f_total_seats"
+                        type="number"
+                        placeholder="200"
+                        class="w-full border border-zinc-200 bg-white px-3 py-2 text-sm focus:outline-none focus:border-zinc-950 rounded-none text-zinc-900"
+                    />
+                </div>
+            </div>
         </div>
-        <div class="mb-6">
-            <label
-                class="block text-xs font-medium text-zinc-500 uppercase tracking-wider mb-1.5"
-                >Ticket Price ($)</label
-            >
-            <input
-                id="f_ticket_price"
-                type="number"
-                step="0.01"
-                placeholder="25.00"
-                class="w-full bg-white border border-zinc-200 rounded-none px-3 py-2.5 text-sm focus:outline-none focus:border-violet-500 transition-colors text-zinc-900"
-            />
-        </div>
-        <div class="flex gap-3 justify-end">
+
+        <div
+            class="flex gap-2 justify-end text-xs mt-6 pt-4 border-t border-zinc-100"
+        >
             <button
                 onclick="closeModal('trainModal')"
-                class="px-4 py-2 text-sm rounded-none border border-zinc-200 text-zinc-700 hover:bg-zinc-100 hover:text-zinc-900 transition-colors"
+                class="px-4 py-2 border border-zinc-200 text-zinc-500 hover:bg-zinc-50 transition-colors rounded-none"
             >
                 Cancel
             </button>
             <button
                 onclick="saveTrain()"
-                class="px-4 py-2 text-sm rounded-none bg-violet-600 hover:bg-violet-500 text-white font-medium transition-colors"
+                class="px-4 py-2 bg-zinc-900 hover:bg-zinc-800 text-white font-medium transition-colors rounded-none"
             >
-                Save
+                Commit Asset
             </button>
         </div>
     </div>
@@ -126,32 +146,29 @@ block content %}
 <script>
     let trains = [],
         editId = null;
+
     const typeBadge = (t) =>
         ({
-            Express: "bg-violet-500/15 text-violet-600",
-            Regional: "bg-amber-500/15 text-amber-600",
-            Night: "bg-zinc-500/15 text-zinc-600",
-            Intercity: "bg-sky-500/15 text-sky-600",
-        })[t] || "bg-zinc-500/15 text-zinc-600";
+            Express: "bg-zinc-900 text-white border-zinc-950",
+            Regional: "bg-amber-50 text-amber-700 border-amber-200",
+            local: "bg-zinc-50 text-zinc-600 border-zinc-200",
+            Intercity: "bg-blue-50 text-blue-700 border-blue-200",
+        })[t] || "bg-zinc-100 text-zinc-700";
 
     function openModal(modalId) {
         const modal = document.getElementById(modalId);
         const box = document.getElementById(modalId + "Box");
         modal.classList.remove("opacity-0", "pointer-events-none");
-        modal.classList.add("opacity-100");
         if (box) {
             box.classList.remove("translate-y-3", "scale-95");
-            box.classList.add("translate-y-0", "scale-100");
         }
     }
 
     function closeModal(modalId) {
         const modal = document.getElementById(modalId);
         const box = document.getElementById(modalId + "Box");
-        modal.classList.remove("opacity-100");
         modal.classList.add("opacity-0", "pointer-events-none");
         if (box) {
-            box.classList.remove("translate-y-0", "scale-100");
             box.classList.add("translate-y-3", "scale-95");
         }
     }
@@ -170,6 +187,7 @@ block content %}
         console.log(`[${type.toUpperCase()}] ${msg}`);
     }
 
+    // Direct structural assignment swap to leverage standard validation behaviors cleanly
     function showConfirm(msg, callback) {
         if (confirm(msg)) callback();
     }
@@ -177,80 +195,118 @@ block content %}
     async function load() {
         trains = await api("/api/trains");
         document.getElementById("trainCount").textContent =
-            `${trains.length} trains`;
+            `${trains.length} Locomotives Tracked`;
         const body = document.getElementById("trainBody");
+
         if (!trains.length) {
-            body.innerHTML = `<tr><td colspan="6"><div class="text-center py-12 text-zinc-500">No trains yet. Add one!</div></td></tr>`;
+            body.innerHTML = `<tr><td colspan="5"><div class="text-center py-12 text-zinc-400 text-sm font-mono">No physical locomotives registered in system fleet schema maps.</div></td></tr>`;
             return;
         }
+
         body.innerHTML = trains
             .map(
                 (t) => `
-    <tr class="hover:bg-zinc-50 transition-colors">
-      <td class="px-4 py-3 text-zinc-500 text-xs">#${t.train_id}</td>
-      <td class="px-4 py-3 font-medium">${t.train_name}</td>
-      <td class="px-4 py-3"><span class="inline-flex px-2.5 py-0.5 rounded-full text-xs font-medium ${typeBadge(t.train_type)}">${t.train_type}</span></td>
-      <td class="px-4 py-3 text-zinc-700">${t.total_seats}</td>
-      <td class="px-4 py-3 text-zinc-700">$${parseFloat(t.ticket_price).toFixed(2)}</td>
-      <td class="px-4 py-3">
-        <div class="flex gap-2">
-          <button onclick="openEdit(${t.train_id})" class="px-3 py-1.5 text-xs rounded-md border border-zinc-200 text-zinc-700 hover:bg-zinc-100 hover:text-zinc-900 transition-colors">Edit</button>
-          <button onclick="del(${t.train_id},'${t.train_name.replace(/'/g, "\\")}')" class="px-3 py-1.5 text-xs rounded-md border border-red-100 text-red-500 hover:bg-red-50 transition-colors">Delete</button>
-        </div>
-      </td>
-    </tr>
-  `,
+            <tr class="hover:bg-zinc-50/60 transition-colors">
+              <td class="px-4 py-2.5 font-mono text-xs text-zinc-400">#${t.train_id}</td>
+              <td class="px-4 py-2.5 font-medium text-zinc-900">${t.train_name}</td>
+              <td class="px-4 py-2.5">
+                <span class="inline-flex px-2 py-0.5 text-[10px] border uppercase tracking-wider font-mono font-medium rounded-none ${typeBadge(t.train_type)}">
+                    ${t.train_type}
+                </span>
+              </td>
+              <td class="px-4 py-2.5 text-zinc-600 font-mono text-xs">${t.total_seats} Capacity</td>
+              <td class="px-4 py-2.5 text-right whitespace-nowrap">
+                <div class="flex gap-2 justify-end text-xs">
+                  <button onclick="openEdit(${t.train_id})" class="px-2 py-1 border border-zinc-200 text-zinc-600 hover:border-zinc-900 transition-all rounded-none">Edit</button>
+                  <button onclick="del(${t.train_id},'${t.train_name.replace(/'/g, "\\")}')" class="px-2 py-1 border border-red-100 text-red-500 hover:bg-red-50 transition-all rounded-none">Delete</button>
+                </div>
+              </td>
+            </tr>
+        `,
             )
             .join("");
     }
 
     function openAdd() {
         editId = null;
-        document.getElementById("trainModalTitle").textContent = "Add Train";
-        ["f_train_name", "f_total_seats", "f_ticket_price"].forEach(
+        document.getElementById("trainModalTitle").textContent =
+            "Add Train Asset";
+        ["f_train_name", "f_total_seats"].forEach(
             (id) => (document.getElementById(id).value = ""),
         );
         document.getElementById("f_train_type").value = "Express";
         openModal("trainModal");
     }
+
     function openEdit(id) {
         const t = trains.find((x) => x.train_id === id);
         editId = id;
-        document.getElementById("trainModalTitle").textContent = "Edit Train";
+        document.getElementById("trainModalTitle").textContent =
+            `Modify Train Asset [ID: ${id}]`;
         document.getElementById("f_train_name").value = t.train_name;
         document.getElementById("f_train_type").value = t.train_type;
         document.getElementById("f_total_seats").value = t.total_seats;
-        document.getElementById("f_ticket_price").value = t.ticket_price;
         openModal("trainModal");
     }
+
     async function saveTrain() {
         const body = {
-            train_name: document.getElementById("f_train_name").value,
+            train_name: document.getElementById("f_train_name").value.trim(),
             train_type: document.getElementById("f_train_type").value,
             total_seats: parseInt(
                 document.getElementById("f_total_seats").value,
-            ),
-            ticket_price: parseFloat(
-                document.getElementById("f_ticket_price").value,
+                10,
             ),
         };
-        if (!body.train_name || !body.total_seats || isNaN(body.ticket_price)) {
-            toast("Fill all fields", "error");
+
+        if (
+            !body.train_name ||
+            isNaN(body.total_seats) ||
+            body.total_seats <= 0
+        ) {
+            toast(
+                "All target infrastructure parameters must be validly populated.",
+                "error",
+            );
             return;
         }
-        if (editId) await api(`/api/trains/${editId}`, "PUT", body);
-        else await api("/api/trains", "POST", body);
-        closeModal("trainModal");
-        toast(editId ? "Train updated" : "Train added");
-        load();
-    }
-    function del(id, name) {
-        showConfirm(`Delete train "${name}"?`, async () => {
-            await api(`/api/trains/${id}`, "DELETE");
-            toast("Train deleted");
+
+        try {
+            if (editId) {
+                await api(`/api/trains/${editId}`, "PUT", body);
+                toast("Fleet locomotive configuration updated.", "success");
+            } else {
+                await api("/api/trains", "POST", body);
+                toast("Locomotive asset linked successfully.", "success");
+            }
+            closeModal("trainModal");
             load();
-        });
+        } catch (e) {
+            toast(
+                "An infrastructure alteration framework fault occurred.",
+                "error",
+            );
+        }
     }
+
+    function del(id, name) {
+        showConfirm(
+            `Permanently purge locomotive profile asset "${name}" from the active database registry index?`,
+            async () => {
+                try {
+                    await api(`/api/trains/${id}`, "DELETE");
+                    toast("Asset removed from fleet registry context.");
+                    load();
+                } catch (e) {
+                    toast(
+                        "De-provisioning transaction sequence failed.",
+                        "error",
+                    );
+                }
+            },
+        );
+    }
+
     load();
 </script>
 {% endblock %}
